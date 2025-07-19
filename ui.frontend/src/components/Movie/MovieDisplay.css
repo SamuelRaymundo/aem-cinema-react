@@ -1,0 +1,151 @@
+/* ui.frontend/src/components/MovieDisplay/MovieDisplay.css */
+
+/* --- Overall MovieDisplay Card --- */
+.cmp-movie-card {
+    /* Main container properties */
+    width: 250px; /* Adjust as needed for your layout */
+    background-color: #2F2F2F; /* Dark background for the bottom section */
+    border-radius: 12px; /* Rounded corners for the entire card */
+    overflow: hidden; /* Ensures content respects border-radius */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); /* Stronger shadow */
+    font-family: 'Segoe UI', Arial, sans-serif; /* Modern font */
+    color: white; /* Default text color for the dark section */
+    margin-bottom: 25px; /* Spacing between cards if in a list */
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Poster Section (Top part of the card) --- */
+.cmp-movie__poster-section {
+    position: relative;
+    width: 100%;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    overflow: hidden;
+}
+
+.cmp-movie__poster {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* --- Age Group Overlay (Base Style) --- */
+.cmp-movie__age-group-overlay {
+    position: absolute;
+    bottom: 15px; /* Adjusted position slightly */
+    right: 15px; /* Adjusted position slightly */
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px; /* Slightly more rounded */
+    font-size: 1.1em; /* Slightly larger font */
+    font-weight: bold;
+    text-align: center;
+    width: 35px; /* Fixed width for the badge */
+    height: 35px; /* Fixed height for the badge */
+    display: flex; /* Use flexbox to center content */
+    align-items: center;
+    justify-content: center;
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.3); /* Small shadow */
+    margin: 0; /* Remove default paragraph margin */
+    z-index: 1; /* Ensure it's above the poster */
+}
+
+/* --- Dynamic Age Group Colors --- */
+.cmp-movie__age-group-overlay--green {
+    background-color: #4CAF50; /* Green */
+}
+
+.cmp-movie__age-group-overlay--blue {
+    background-color: #2196F3; /* Blue */
+}
+
+.cmp-movie__age-group-overlay--yellow {
+    background-color: #FFEB3B; /* Yellow */
+    color: #333; /* Darker text for yellow background */
+}
+
+.cmp-movie__age-group-overlay--orange {
+    background-color: #FF9800; /* Orange */
+}
+
+.cmp-movie__age-group-overlay--red {
+    background-color: #F44336; /* Red */
+}
+
+.cmp-movie__age-group-overlay--black {
+    background-color: #333; /* Dark Grey/Black */
+}
+
+
+/* --- Details Section (Bottom dark part of the card) --- */
+.cmp-movie__details-section {
+    padding: 15px 15px 20px 15px; /* Top, right, bottom, left padding */
+    background-color: #2F2F2F; /* Dark background */
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+    position: relative;
+    min-height: 80px;
+    text-align: left;
+}
+
+.cmp-movie__title {
+    color: white;
+    font-size: 1.3em;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    line-height: 1.3;
+    padding-right: 30px;
+}
+
+.cmp-movie__meta-info {
+    display: flex;
+    align-items: center;
+    font-size: 0.9em;
+    color: #bbb;
+    margin-bottom: 0;
+}
+
+.cmp-movie__gender,
+.cmp-movie__time {
+    margin: 0;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cmp-movie__meta-separator {
+    margin: 0 5px;
+    color: #888;
+}
+
+
+/* --- Placeholder for Editor --- */
+.cmp-movie__placeholder {
+    color: #999;
+    text-align: center;
+    padding: 20px;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
+    background-color: #f0f0f0;
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cmp-movie__placeholder p {
+    margin: 0;
+}
+
+/* Ensure these are still hidden if not used (from previous versions) */
+.cmp-movie__synopsis,
+.cmp-movie__release-date,
+.cmp-movie__linked-cf {
+    display: none;
+}

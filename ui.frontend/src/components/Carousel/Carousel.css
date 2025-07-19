@@ -1,0 +1,71 @@
+
+/* ---------- CONTAINER PRINCIPAL ---------- */
+.carousel-container {
+    position: relative;
+    width: 100vw;          /* ocupa toda a largura da viewport */
+    height: 60vh;          /* banner alto — ajuste a gosto   */
+    min-height: 320px;     /* garante altura mínima           */
+    overflow: hidden;
+}
+
+/* ---------- WRAPPER DOS SLIDES ---------- */
+.carousel-slides-wrapper {
+    position: relative; /* Add this: Crucial for absolutely positioning children */
+    width: 100%;       /* Ensure it takes full width */
+    height: 100%;      /* Ensure it takes full height */
+    overflow: hidden;  /* Keep overflow hidden */
+}
+
+/* ---------- CONTROLES ---------- */
+.carousel-control {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.55);
+    color: var(--text-light);
+    font-size: 2rem;
+    border: none;
+    cursor: pointer;
+    z-index: 10;
+}
+.carousel-control.prev { left: 24px; }
+.carousel-control.next { right: 24px; }
+.carousel-control:hover { background: rgba(0,0,0,0.8); }
+
+/* ---------- INDICADORES ---------- */
+.carousel-indicators {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    z-index: 10;
+}
+.indicator-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.55);
+    border: 1px solid #aaa;
+    cursor: pointer;
+    transition: all .25s ease;
+}
+.indicator-dot.active {
+    background: var(--secondary-color);
+    border-color: var(--secondary-color);
+    transform: scale(1.25);
+}
+.indicator-dot:hover { background: #fff; }
+
+/* ---------- RESPONSIVO ---------- */
+@media (max-width: 768px){
+    .carousel-container { height: 50vh; }
+    .carousel-control { width: 40px; height: 40px; font-size: 1.5rem; }
+}
+@media (max-width: 480px){
+    .carousel-control{ display:none; }  /* usa apenas swipe/dots */
+}

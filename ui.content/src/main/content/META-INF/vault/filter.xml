@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workspaceFilter version="1.0">
+    <filter root="/conf/aem-cinema-react" mode="merge"/>
+    <filter root="/content/aem-cinema-react" mode="merge"/>
+    <filter root="/content/dam/aem-cinema-react" mode="merge">
+        <exclude pattern="/content/dam/aem-cinema-react(/.*)?"/>
+        <include pattern="/content/dam/aem-cinema-react/jcr:content(/.*)?"/>
+    </filter>
+    <filter root="/content/dam/aem-cinema-react/asset.jpg" mode="merge"/>
+    <filter root="/content/experience-fragments/aem-cinema-react" mode="merge"/>
+</workspaceFilter>

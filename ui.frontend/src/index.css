@@ -1,0 +1,45 @@
+/* ui.frontend/src/App.css ou index.css */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap');
+html, body, #root, .App {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+.page {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0;
+}
+
+
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--background-dark);
+  color: var(--text-light);
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 20px 24px;
+}
+
+/* As variáveis de cor podem ser definidas aqui no :root para serem globais */
+/* ou importadas de um arquivo de variáveis.css */
+:root {
+  --background-dark: #333;
+  --primary-dark-blue: #1E2A3A;
+  --secondary-color: #d50015;
+  --text-light: #E0E0E0;
+  --text-lighter: #F5F5F5;
+  --text-dark: #121212;
+  --hover-blue: #2A3B50;
+  --hover-orange: #E65100;
+  --button-hover-bg: #424242;
+  --button-hover-text: #E0E0E0;
+  --shadow-color: rgba(0, 0, 0, 0.4);
+  --border-radius-pill: 9999px;
+  --transition-speed: 0.3s;
+  --font-sans: "Roboto Condensed", sans-serif;
+}

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+          jcr:primaryType="nt:unstructured"
+          jcr:title="Conteúdo do carrossel"
+          sling:resourceType="cq/gui/components/authoring/dialog">
+    <content
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/foundation/container">
+        <items jcr:primaryType="nt:unstructured">
+            <column
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/foundation/container">
+                <items jcr:primaryType="nt:unstructured">
+                    <list
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/foundation/form/select"
+                            class="cq-dialog-dropdown-showhide"
+                            cq-dialog-dropdown-showhide-target=".carousel-options-showhide-target"
+                            fieldLabel="Tipo de conteúdo"
+                            name="./contentType">
+                        <items jcr:primaryType="nt:unstructured">
+                            <option1
+                                    jcr:primaryType="nt:unstructured"
+                                    text="Slide"
+                                    value="slide"/>
+                            <option2
+                                jcr:primaryType="nt:unstructured"
+                                text="Filmes"
+                                value="movies"
+                                />
+                        </items>
+                    </list>
+                    <slide
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/foundation/container"
+                            class="hide carousel-options-showhide-target foundation-layout-util-vmargin"
+                            showhidetargetvalue="slide">
+                        <items jcr:primaryType="nt:unstructured">
+                            <heading
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/foundation/heading"
+                                    class="coral-Heading coral-Heading--4"
+                                    level="{Long}4"
+                                    text="Propriedades do Slide"/>
+                            <slideFields
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
+                                    composite="{Boolean}true">
+                                <field
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/container"
+                                        name="./slideAssets">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <fileReference
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="cq/gui/components/authoring/dialog/fileupload"
+                                                allowUpload="{Boolean}false"
+                                                autoStart="{Boolean}false"
+                                                class="cq-droptarget"
+                                                fieldDescription="Obrigatório inserir uma imagem para o slide."
+                                                fieldLabel="Imagem para ilustrar o slide"
+                                                fileNameParameter="./fileName"
+                                                fileReferenceParameter="./fileReference"
+                                                mimeTypes="[image/gif,image/jpeg,image/png,image/tiff,image/svg+xml]"
+                                                multiple="{Boolean}false"
+                                                name="./image"
+                                                uploadUrl="${suffix.path}"
+                                                useHTML5="{Boolean}true"/>
+                                        <title
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                emptyText="Insira o título do slide."
+                                                fieldDescription="Obrigatório informar o título do slide."
+                                                fieldLabel="Título"
+                                                name="./title"/>
+                                        <buttonName
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                emptyText="Insira um rótulo para o botão."
+                                                fieldDescription="Nome do botão no front-end"
+                                                fieldLabel="Texto do botão"
+                                                name="./buttonName"
+                                                required="{Boolean}false"/>
+                                        <internalLink
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                                emptyText="Selecione a URL para um endereço interno."
+                                                fieldDescription="Link para qual botão irá redirecionar"
+                                                fieldLabel="Link Interno"
+                                                forceSelection="{Boolean}true"
+                                                rootPath="/content/"
+                                                name="./internalLink"
+                                                required="{Boolean}false"/>
+                                        <externalLink
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                emptyText="Insira a URL para endereço externo."
+                                                fieldDescription="Link para qual o botão irá redirecionar"
+                                                fieldLabel="Link Externo"
+                                                name="./externalLink"
+                                                required="{Boolean}false"/>
+                                    </items>
+                                </field>
+                            </slideFields>
+                        </items>
+                    </slide>
+                    <movies
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/foundation/container"
+                            class="hide carousel-options-showhide-target foundation-layout-util-vmargin"
+                            showhidetargetvalue="movies">
+                        <items jcr:primaryType="nt:unstructured">
+                            <heading
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/foundation/heading"
+                                    class="coral-Heading coral-Heading--4"
+                                    level="{Long}4"
+                                    text="Content Fragment do Filme"/>
+                            <movieFields
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
+                                    composite="{Boolean}true">
+                                <field
+                                        jcr:primaryType="nt:unstructured"
+                                        sling:resourceType="granite/ui/components/coral/foundation/container"
+                                        name="./moiveAssets">
+                                    <items jcr:primaryType="nt:unstructured">
+                                        <fragmentPath
+                                                jcr:primaryType="nt:unstructured"
+                                                sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                                fieldLabel="Select MovieDisplay Content Fragment"
+                                                name="./fragmentPath"
+                                                rootPath="/content/dam/aem-cinema-react/movies-"
+                                                selectionMode="single"
+                                                class="coral-Form-field"
+                                                filter="hierarchy"
+                                                variant="default"
+                                                sortable="{Boolean}false"
+                                                textFilterEnabled="{Boolean}true"
+                                                emptyText="Browse for a 'Filme' Content Fragment..."
+                                                itemResourceType="dam/cfm/components/contentfragment/item"
+                                                fieldDescription="Select a Content Fragment based on the 'Filme' model."
+                                                fragmentModels="/conf/aem-cinema-react/settings/dam/cfm/models/filme"/>
+                                    </items>
+                                </field>
+                            </movieFields>
+                        </items>
+                    </movies>
+                </items>
+            </column>
+        </items>
+    </content>
+</jcr:root>

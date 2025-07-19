@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+          xmlns:granite="http://www.adobe.com/jcr/granite/1.0"
+          jcr:primaryType="nt:unstructured"
+          jcr:title="MovieDisplay Properties (Content Fragment)"
+          sling:resourceType="cq/gui/components/authoring/dialog">
+    <content
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/container">
+        <items jcr:primaryType="nt:unstructured">
+            <tabs
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/tabs"
+                    maximized="{Boolean}true">
+                <items jcr:primaryType="nt:unstructured">
+                    <fragmentSelection
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Content Fragment Selection"
+                            sling:resourceType="granite/ui/components/coral/foundation/container"
+                            margin="{Boolean}true">
+                        <items jcr:primaryType="nt:unstructured">
+                            <column
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <fragmentPath
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                            fieldLabel="Select MovieDisplay Content Fragment"
+                                            name="./fragmentPath"
+                                            rootPath="/content/dam"
+                                            selectionMode="single"
+                                            class="coral-Form-field"
+                                            filter="hierarchy"
+                                            variant="default"
+                                            sortable="{Boolean}false"
+                                            textFilterEnabled="{Boolean}true"
+                                            emptyText="Browse for a 'Filme' Content Fragment..."
+                                            itemResourceType="dam/cfm/components/contentfragment/item"
+                                            fieldDescription="Select a Content Fragment based on the 'Filme' model."
+                                            fragmentModels="/conf/aem-cinema-react/settings/dam/cfm/models/filme"/>
+                                </items>
+                            </column>
+                        </items>
+                    </fragmentSelection>
+                </items>
+            </tabs>
+        </items>
+    </content>
+</jcr:root>

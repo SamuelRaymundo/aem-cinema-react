@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+          xmlns:granite="http://www.adobe.com/jcr/granite/1.0"  jcr:primaryType="nt:unstructured"
+          jcr:title="Destaques"
+          sling:resourceType="cq/gui/components/authoring/dialog">
+    <content
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="granite/ui/components/coral/foundation/container">
+        <items jcr:primaryType="nt:unstructured">
+            <tabs
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/tabs"
+                    maximized="{Boolean}false">
+                <items jcr:primaryType="nt:unstructured">
+                    <fileReference
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="cq/gui/components/authoring/dialog/fileupload"
+                            allowUpload="{Boolean}false"
+                            autoStart="{Boolean}false"
+                            class="cq-droptarget"
+                            fieldDescription="Obrigatório inserir uma imagem para o slide."
+                            fieldLabel="Imagem para ilustrar o slide"
+                            fileNameParameter="./fileName"
+                            fileReferenceParameter="./fileReference"
+                            mimeTypes="[image/gif,image/jpeg,image/png,image/tiff,image/svg+xml]"
+                            multiple="{Boolean}false"
+                            name="./image"
+                            uploadUrl="${suffix.path}"
+                            useHTML5="{Boolean}true"/>
+
+                    <metadata
+                            jcr:primaryType="nt:unstructured"
+                            sling:hideResource="{Boolean}true"/>
+                    <content
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Texto e Botão"
+                            sling:resourceType="granite/ui/components/coral/foundation/container"
+                            margin="{Boolean}true">
+                        <items jcr:primaryType="nt:unstructured">
+                            <columns
+                                    jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns"
+                                    margin="{Boolean}true">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <column
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/container">
+                                        <items jcr:primaryType="nt:unstructured">
+                                            <alignment
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                                    emptyOption="{Boolean}false"
+                                                    fieldLabel="Alinhamento do Texto" name="./alignment" >
+                                                <items jcr:primaryType="nt:unstructured">
+                                                    <left
+                                                            jcr:primaryType="nt:unstructured"
+                                                            text="Esquerda"
+                                                            value=""/>
+                                                    <right
+                                                            jcr:primaryType="nt:unstructured"
+                                                            text="Direita"
+                                                            value="text-end"/>
+                                                </items>
+                                            </alignment>
+                                            <title
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                    emptyText="Insira um titulo ao texto."
+                                                    fieldDescription="Titulo que será no exibido no texto"
+                                                    fieldLabel="Título"
+                                                    name="./title"
+                                                    required="{Boolean}true"/>
+                                            <description
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                    emptyText="Insira uma descirção para o texto."
+                                                    fieldDescription="Descrição que será exibida no texto"
+                                                    fieldLabel="Descrição"
+                                                    name="./description"
+                                                    required="{Boolean}true"/>
+
+                                            <buttonAndLinkSettings
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/well"
+                                                    fieldLabel="Configurações do Botão e Link">
+                                                <items jcr:primaryType="nt:unstructured">
+                                                    <buttonName
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                            emptyText="Insira um rótulo para o botão."
+                                                            fieldDescription="Texto que aparecerá no botão no front-end."
+                                                            fieldLabel="Texto do Botão"
+                                                            name="./buttonName"
+                                                            required="{Boolean}false"/>
+                                                    <internalLink
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/pathfield"
+                                                            emptyText="Selecione a URL para um endereço interno."
+                                                            fieldDescription="Link para qual botão irá redirecionar"
+                                                            fieldLabel="Link Interno"
+                                                            forceSelection="{Boolean}true"
+                                                            rootPath="/content/"
+                                                            name="./internalLink"
+                                                            required="{Boolean}false"/>
+                                                    <externalLink
+                                                            jcr:primaryType="nt:unstructured"
+                                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                                            emptyText="Insira a URL para endereço externo."
+                                                            fieldDescription="Link para qual o botão irá redirecionar"
+                                                            fieldLabel="Link Externo"
+                                                            name="./externalLink"
+                                                            required="{Boolean}false"/>
+                                                </items>
+                                            </buttonAndLinkSettings>
+                                        </items>
+                                    </column>
+                                </items>
+                            </columns>
+                        </items>
+                    </content>
+                </items>
+            </tabs>
+        </items>
+    </content>
+</jcr:root>
