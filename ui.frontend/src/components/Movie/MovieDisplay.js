@@ -1,7 +1,7 @@
 // components/MovieDisplay/MovieDisplay.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './MovieDisplay.css'; // Crie este CSS ou use seu Movie.css existente
+import './MovieDisplay.css';
 
 const getAemHost = () => {
     if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
@@ -22,85 +22,123 @@ const getAgeGroupColorClass = (ageGroup) => {
     }
 };
 
-const MovieDisplay = ({ fragmentPath, cqPath }) => { // Remova 'MapTo' daqui se ele for apenas um sub-componente
-    const [movieData, setMovieData] = useState(null);
+// MovieDisplay now accepts a 'movie' prop (for data already fetched by parent)
+// or 'fragmentPath' (for standalone fetching).
+const MovieDisplay = ({ movie, fragmentPath, cqPath }) => {
+    const [fetchedMovieData, setFetchedMovieData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
 
+    // Prioritize the 'movie' prop if it's provided, otherwise use fetched data
+    const currentMovieData = movie || fetchedMovieData;
+
     useEffect(() => {
-        if (!fragmentPath) {
-            console.warn("MovieDisplay: No Content Fragment path provided.");
+        // If a 'movie' prop is provided, we don't need to fetch.
+        // This is the case when Carousel passes pre-fetched movie data.
+        if (movie) {
             setLoading(false);
-            setMovieData(null);
+            setFetchedMovieData(null); // Clear any previous fetched state if now using prop
             return;
         }
 
-        const fetchMovieFragment = async () => {
-            setLoading(true);
-            setError(false);
-            setMovieData(null);
+        // Only proceed with fetching if fragmentPath is provided AND no 'movie' prop is present
+        if (fragmentPath) {
+            const fetchMovieFragment = async () => {
+                setLoading(true);
+                setError(false);
+                setFetchedMovieData(null);
 
-            try {
-                const graphqlEndpoint = `${getAemHost()}/content/cq:graphql/aem-cinema-react/endpoint.json`;
-                // Certifique-se de que a query está correta e corresponde ao seu modelo de CF
-                const query = `
-                    query GetFilmeByPath($path: String!) {
-                        filmeByPath(_path: $path) {
-                            item {
-                                title
-                                poster {
-                                    _path
-                                }
-                                ageGroup
-                                gender
-                                movieTime
-                                synopsis {
-                                    html
+                try {
+                    const graphqlEndpoint = `${getAemHost()}/content/cq:graphql/aem-cinema-react/endpoint.json`;
+                    // Adjust query based on your actual AEM GraphQL schema.
+                    // This assumes 'filmeByPath' directly returns the item, not wrapped in 'item'.
+                    // If it's wrapped, adjust 'fetchedData' access below.
+                    const query = `
+                        query GetFilmeByPath($path: String!) {
+                          filmeByPath(_path: $path) {
+                            title
+                            poster {
+                              ... on ImageRef {
+                                _path
+                                mimeType
+                              }
+                            }
+                            ageGroup
+                            gender
+                            movieTime
+                            }
+                          }
+                        }
+                    `;
+                    // Alternative if 'filmeList' with filter is your only option for single item:
+                    /*
+                    const query = `
+                        query GetFilmeList($path: String!) {
+                            filmeList(filter: {_path: {EQ: $path}}) {
+                                items {
+                                    title
+                                    poster { ... on ImageRef { _path mimeType } }
+                                    ageGroup
+                                    gender
+                                    movieTime
+                                    synopsis { json }
                                 }
                             }
                         }
-                    }
-                `;
+                    `;
+                    */
 
-                const response = await axios.post(graphqlEndpoint, {
-                    query: query,
-                    variables: {
-                        path: fragmentPath
-                    }
-                }, {
-                    withCredentials: true
-                });
-
-                if (response.data && response.data.data && response.data.data.filmeByPath && response.data.data.filmeByPath.item) {
-                    const fetchedData = response.data.data.filmeByPath.item;
-                    setMovieData({
-                        title: fetchedData.title,
-                        poster: fetchedData.poster ? `${getAemHost()}${fetchedData.poster._path}` : '',
-                        ageGroup: fetchedData.ageGroup,
-                        gender: fetchedData.gender,
-                        movieTime: fetchedData.movieTime,
-                        synopsis: fetchedData.synopsis ? fetchedData.synopsis.html : ''
+                    const response = await axios.post(graphqlEndpoint, {
+                        query: query,
+                        variables: {
+                            path: fragmentPath
+                        }
+                    }, {
+                        withCredentials: true
                     });
-                } else {
+
+                    let fetchedData = null;
+                    // Adjust access based on your actual GraphQL response structure
+                    if (response.data?.data?.filmeByPath) { // For 'filmeByPath' directly
+                        fetchedData = response.data.data.filmeByPath;
+                    }
+                    // For 'filmeList' with filter:
+                    // if (response.data?.data?.filmeList?.items?.length > 0) {
+                    //    fetchedData = response.data.data.filmeList.items[0];
+                    // }
+
+
+                    if (fetchedData) {
+                        setFetchedMovieData({
+                            title: fetchedData.title,
+                            poster: fetchedData.poster ? `${getAemHost()}${fetchedData.poster._path}` : '',
+                            ageGroup: fetchedData.ageGroup,
+                            gender: fetchedData.gender,
+                            movieTime: fetchedData.movieTime,
+                            synopsis: fetchedData.synopsis?.json?.html || '' // Access rich text HTML
+                        });
+                    } else {
+                        setError(true);
+                        console.error("MovieDisplay: Failed to fetch Content Fragment data or data is empty.", response.data);
+                    }
+                } catch (err) {
+                    console.error("MovieDisplay: Error fetching Content Fragment:", err);
                     setError(true);
-                    console.error("MovieDisplay: Failed to fetch Content Fragment data or data is empty.", response.data);
+                } finally {
+                    setLoading(false);
                 }
-            } catch (err) {
-                console.error("MovieDisplay: Error fetching Content Fragment:", err);
-                setError(true);
-            } finally {
-                setLoading(false);
-            }
-        };
+            };
+            fetchMovieFragment();
+        } else {
+            // No fragmentPath and no 'movie' prop, so nothing to do.
+            setLoading(false);
+            setFetchedMovieData(null);
+        }
+    }, [fragmentPath, movie]); // Depend on fragmentPath or 'movie' prop changing
 
-        fetchMovieFragment();
-    }, [fragmentPath]); // Dependência: fragmentPath
-
-    if (!cqPath && !fragmentPath) {
-        return null; // ou um placeholder se preferir
-    }
-
-    if (loading) {
+    // Render loading/error/placeholder states only if data is being fetched (i.e., no 'movie' prop)
+    // If 'movie' prop is present, these states are irrelevant as data is already available.
+    if (!movie && loading) {
         return (
             <div className="cmp-movie-card cmp-movie__placeholder">
                 <p>Carregando detalhes do filme...</p>
@@ -108,7 +146,7 @@ const MovieDisplay = ({ fragmentPath, cqPath }) => { // Remova 'MapTo' daqui se 
         );
     }
 
-    if (error) {
+    if (!movie && error) {
         return (
             <div className="cmp-movie-card cmp-movie__placeholder cmp-movie__error">
                 <p>Erro ao carregar os detalhes do filme. Verifique a seleção do Content Fragment.</p>
@@ -116,17 +154,24 @@ const MovieDisplay = ({ fragmentPath, cqPath }) => { // Remova 'MapTo' daqui se 
         );
     }
 
-    const hasContent = movieData && (movieData.title || movieData.poster || movieData.gender || movieData.movieTime || movieData.ageGroup);
+    // This condition handles cases where no movie data (either from prop or fetched) is available.
+    // Also covers the initial state if neither `movie` nor `fragmentPath` are provided.
+    const hasContent = currentMovieData && (currentMovieData.title || currentMovieData.poster || currentMovieData.gender || currentMovieData.movieTime || currentMovieData.ageGroup || currentMovieData.synopsis);
 
     if (!hasContent) {
-        return (
-            <div className="cmp-movie-card cmp-movie__placeholder">
-                <p>Configure o componente Filme: Selecione um Content Fragment 'Filme' no diálogo.</p>
-            </div>
-        );
+        // This message is primarily for authoring mode when fragmentPath is expected
+        // but nothing is configured, or for standalone MovieDisplay with no movie prop.
+        if (fragmentPath) { // Only show this if we expected a fragment
+            return (
+                <div className="cmp-movie-card cmp-movie__placeholder">
+                    <p>Configure o componente Filme: Selecione um Content Fragment 'Filme' no diálogo.</p>
+                </div>
+            );
+        }
+        return null; // Don't render anything if no data and no fragmentPath to prompt config
     }
 
-    const { title, poster, ageGroup, gender, movieTime, synopsis } = movieData;
+    const { title, poster, ageGroup, gender, movieTime, synopsis } = currentMovieData;
     const ageGroupColorClass = ageGroup ? getAgeGroupColorClass(ageGroup) : '';
 
     return (

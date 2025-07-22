@@ -123,7 +123,7 @@
                                 <field
                                         jcr:primaryType="nt:unstructured"
                                         sling:resourceType="granite/ui/components/coral/foundation/container"
-                                        name="./moiveAssets">
+                                        name="./movieAssets">
                                     <items jcr:primaryType="nt:unstructured">
                                         <fragmentPath
                                                 jcr:primaryType="nt:unstructured"

@@ -1,30 +1,27 @@
-// components/CarouselItem/CarouselItem.jsx
 import React from 'react';
-import MovieDisplay from '../MovieDisplay/MovieDisplay'; // Importe o novo componente
 import './CarouselItem.css';
 
 const CarouselItem = (props) => {
-    const { contentType, isActive, fileReference, title, buttonName, internalLink, externalLink, fragmentPath } = props;
+    const { isActive, fileReference, title, buttonName, internalLink, externalLink } = props;
 
     return (
         <div className={`carousel-item ${isActive ? 'active' : ''}`}>
-            {/* Renderiza um Slide */}
-            {contentType === 'slide' && (
-                <div className="carousel-slide-content">
-                    {fileReference && <img src={fileReference} alt={title || 'Slide Image'} className="carousel-image" />}
-                    {title && <h3 className="carousel-title">{title}</h3>}
-                    {buttonName && (internalLink || externalLink) && (
-                        <a href={internalLink || externalLink} className="carousel-button">
-                            {buttonName}
-                        </a>
-                    )}
+            {/* Image Wrapper and Image */}
+            {fileReference && (
+                <div className="carousel-item__image-wrapper"> {/* Use this class */}
+                    <img src={fileReference} alt={title || 'Slide Image'} className="carousel-item__image" /> {/* Use this class */}
                 </div>
             )}
 
-            {/* Renderiza um Filme usando o componente MovieDisplay */}
-            {contentType === 'movies' && (
-                <MovieDisplay fragmentPath={fragmentPath} cqPath={props.cqPath} />
-            )}
+            {/* Overlay Content */}
+            <div className="carousel-item__overlay-content"> {/* Use this class */}
+                {title && <h3 className="carousel-item__title">{title}</h3>} {/* Use this class */}
+                {buttonName && (internalLink || externalLink) && (
+                    <a href={internalLink || externalLink} className="carousel-item__button"> {/* Use this class */}
+                        {buttonName}
+                    </a>
+                )}
+            </div>
         </div>
     );
 };

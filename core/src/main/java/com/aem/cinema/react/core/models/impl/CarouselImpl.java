@@ -4,6 +4,7 @@ import com.aem.cinema.react.core.models.Carousel;
 import com.aem.cinema.react.core.models.CarouselItem; // New interface for individual slide
 import com.adobe.cq.export.json.ComponentExporter;
 import com.adobe.cq.export.json.ExporterConstants;
+import com.aem.cinema.react.core.models.Movie;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Exporter;
@@ -35,56 +36,59 @@ public class CarouselImpl implements Carousel, ComponentExporter {
 
     protected static final String RESOURCE_TYPE = "aem-cinema-react/components/carousel";
 
-    // You can inject properties specific to the overall carousel, if any
+
     @ValueMapValue
-    private String contentType; // From your dialog's "contentType" field
+    private String contentType;
 
-    // This is the key: Inject the child resources created by the multifield
-    // The 'name' attribute here must match the 'name' attribute of the <field> in your dialog's multifield,
-    // which is "./slideAssets" from your XML.
     @ChildResource(name = "slideAssets")
-    private List<Resource> slideResources; // Inject as raw Resources initially
+    private List<Resource> slideResources;
 
-    // This list will hold the adapted CarouselItem models
+    @ChildResource(name = "movieAssets")
+    private List<Resource> movieResources;
+
     private List<CarouselItem> slides;
 
-    // The PostConstruct method is executed after all injections are done.
-    // It's used to adapt the raw Resources into your specific CarouselItem models.
+    private List<Movie> movies;
+
+
     @PostConstruct
     protected void init() {
         if (slideResources != null && !slideResources.isEmpty()) {
             slides = slideResources.stream()
                     .map(resource -> resource.adaptTo(CarouselItem.class))
-                    .filter(java.util.Objects::nonNull) // Filter out any resources that couldn't be adapted
+                    .filter(java.util.Objects::nonNull)
                     .collect(Collectors.toList());
         } else {
             slides = Collections.emptyList();
         }
+
+
+        if (movieResources != null && !movieResources.isEmpty()) {
+            movies = movieResources.stream()
+                    .map(resource -> resource.adaptTo(Movie.class))
+                    .filter(java.util.Objects::nonNull)
+                    .collect(Collectors.toList());
+        } else {
+            movies = Collections.emptyList();
+        }
     }
 
-    /**
-     * Returns the list of carousel items (slides).
-     * This is the primary method to expose the multifield data.
-     * @return A list of {@link CarouselItem} models.
-     */
-    @Override // If your Carousel interface defines getSlides()
+    @Override
     public List<CarouselItem> getSlides() {
         return slides;
     }
 
-    /**
-     * Returns the content type chosen in the dialog (e.g., "slide").
-     * @return The content type string.
-     */
+    @Override
+    public List<Movie> getMovies() {
+        return movies;
+    }
+
     public String getContentType() {
         return contentType;
     }
 
-    // --- ComponentExporter method for SPA/headless ---
     @Override
     public String getExportedType() {
-        return RESOURCE_TYPE; // Must match the component's resource type
+        return RESOURCE_TYPE;
     }
-
-
 }

@@ -1,75 +1,82 @@
 /* src/components/CarouselItem/CarouselItem.css */
 
 /* ---------- SLIDE BASE ---------- */
-/* src/components/CarouselItem/CarouselItem.css */
-
-/* ---------- SLIDE BASE ---------- */
 .carousel-item {
-    position: absolute; /* CHANGE: Position absolutely inside the wrapper */
+    position: absolute;
     top: 0;
     left: 0;
-    width: 100%;       /* Take full width of parent */
-    height: 100%;      /* Take full height of parent */
-
-    display: flex;     /* Keep flex properties for content centering/alignment */
-    align-items: center;
-    justify-content: center;
-
+    width: 100%;
+    height: 100%;
+    /* Remove display: flex, align-items, justify-content from here
+       if you want the image to be the background and the content overlaid
+       as separate elements. Keeping them here will try to center the
+       image-wrapper AND the overlay-content together, which is not what you want.
+       Just having position: absolute on children will layer them.
+    */
     opacity: 0;
     transition: opacity .8s ease;
-    z-index: 1; /* Default z-index */
+    z-index: 1;
     font-family: var(--font-sans);
 }
 
 /* Active slide */
 .carousel-item.active {
     opacity: 1;
-    z-index: 2; /* Bring active slide to the front */
+    z-index: 2;
 }
 
-/* ... (rest of your CarouselItem.css remains as is) ... */
-
-/* ---------- IMAGE ---------- */
+/* ---------- IMAGE WRAPPER AND IMAGE ---------- */
 .carousel-item__image-wrapper {
-    width: 100%;
-    height: 100%;
-    position: relative; /* To contain absolutely positioned image */
+    position: absolute; /* Position this wrapper absolutely within .carousel-item */
+    top: 0;
+    left: 0;
+    width: 100%; /* Make it fill the carousel-item */
+    height: 100%; /* Make it fill the carousel-item */
+    overflow: hidden; /* Crucial to clip the image if it exceeds bounds */
+    /* Remove position: relative; if you want the img to be positioned directly within carousel-item.
+       It's not strictly necessary here if the image itself is not absolutely positioned relative to this wrapper. */
 }
+
 .carousel-item__image {
     width: 100%;
     height: 100%;
-    object-fit: cover;       /* covers the entire area without distorting */
+    object-fit: cover;       /* Key for covering the area */
     object-position: center;
     display: block;
 }
 
-/* ---------- OVERLAY (NO SHADOW!) ---------- */
+/* ---------- OVERLAY (Content Wrapper for title and button) ---------- */
 .carousel-item__overlay-content {
     position: absolute;
-    bottom: 5%; /* CHANGE: Position from the bottom */
+    bottom: 5%;
     left: 5%;
-    transform: translateY(0); /* REMOVED: No vertical centering needed for bottom alignment */
+    /* transform: translateY(0); is redundant if bottom/left are set and not overriding previous transforms */
     width: auto;
     max-width: 60%;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    justify-content: flex-end; /* CHANGE: Align content to the bottom */
+    justify-content: flex-end;
     padding: 0;
-    pointer-events: none;
+    /* IMPORTANT: pointer-events: none; should be on the OVERLAY DIV
+       if you want clicks to pass through to elements *behind* it.
+       Then, re-enable pointer-events: auto; for the actual clickable elements inside (like the button).
+    */
+    pointer-events: none; /* Allows clicks to pass through this overlay div */
+    z-index: 3; /* Ensure it's above the image */
 }
 
 
 /* ---------- TITLE ---------- */
 .carousel-item__title {
-    font-size: clamp(1.5rem, 4vw, 3rem); /* Smaller range */
+    font-size: clamp(1.5rem, 4vw, 3rem);
     font-weight: 800;
     color: var(--text-light);
     text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
     letter-spacing: 2px;
     text-transform: uppercase;
     margin: 0 0 1.2rem;
-    pointer-events: auto;
+    pointer-events: auto; /* Re-enable pointer events for the title text */
     text-align: left;
     line-height: 1.1;
 }
@@ -80,7 +87,8 @@
     padding: 0.9rem 2.5rem;
     font-size: 1.1rem;
     font-weight: 700;
-    background: var(--secondary-color); /* Assuming --secondary-color is defined */
+    text-decoration: none;
+    background: var(--secondary-color);
     color: var(--text-light);
     border: none;
     border-radius: 8px;
@@ -88,7 +96,7 @@
     text-transform: uppercase;
     box-shadow: 0 6px 18px rgba(0,0,0,.35);
     transition: transform .2s ease, background .25s ease;
-    pointer-events: auto;
+    pointer-events: auto; /* Re-enable pointer events for the button */
 }
 .carousel-item__button:hover {
     background: #ff3b3b;
@@ -109,6 +117,6 @@
     .carousel-item__overlay-content {
         left: 4%;
         max-width: 85%;
-        bottom: 4%; /* CHANGE: Adjust for mobile as well */
+        bottom: 4%;
     }
 }

@@ -1,22 +1,15 @@
+/* Carousel.css */
 
-/* ---------- CONTAINER PRINCIPAL ---------- */
+/* --- Base Styles for BOTH Carousel Types (if applicable) --- */
 .carousel-container {
+    font-family: var(--font-sans);
     position: relative;
-    width: 100vw;          /* ocupa toda a largura da viewport */
-    height: 60vh;          /* banner alto — ajuste a gosto   */
-    min-height: 320px;     /* garante altura mínima           */
-    overflow: hidden;
+    width: 100vw;
+    min-height: 100px; /* Smallest sensible height */
+    overflow: hidden; /* Important for controls to be relative to container */
 }
 
-/* ---------- WRAPPER DOS SLIDES ---------- */
-.carousel-slides-wrapper {
-    position: relative; /* Add this: Crucial for absolutely positioning children */
-    width: 100%;       /* Ensure it takes full width */
-    height: 100%;      /* Ensure it takes full height */
-    overflow: hidden;  /* Keep overflow hidden */
-}
-
-/* ---------- CONTROLES ---------- */
+/* Base controls for both types */
 .carousel-control {
     position: absolute;
     top: 50%;
@@ -30,12 +23,13 @@
     border: none;
     cursor: pointer;
     z-index: 10;
+    transition: background 0.3s ease; /* Add transition for hover */
 }
 .carousel-control.prev { left: 24px; }
 .carousel-control.next { right: 24px; }
 .carousel-control:hover { background: rgba(0,0,0,0.8); }
 
-/* ---------- INDICADORES ---------- */
+/* Base indicators for both types (if needed, otherwise remove for movie type) */
 .carousel-indicators {
     position: absolute;
     bottom: 18px;
@@ -61,11 +55,120 @@
 }
 .indicator-dot:hover { background: #fff; }
 
-/* ---------- RESPONSIVO ---------- */
+
+/* ========================================= */
+/* --- STYLES FOR SLIDE CAROUSEL (Image/Text Banner) --- */
+/* ========================================= */
+.carousel--slide-type {
+    height: 60vh; /* Specific height for your full-screen banner */
+    background-color: var(--background-dark); /* Example background */
+}
+
+.carousel--slide-type .carousel-slides-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Specific button/indicator positioning for slide type if needed */
+.carousel--slide-type .carousel-control.prev { left: 24px; }
+.carousel--slide-type .carousel-control.next { right: 24px; }
+.carousel--slide-type .carousel-indicators { bottom: 18px; }
+
+/* components/Carousel/Carousel.css */
+
+/* ... (previous code) ... */
+
+/* ========================================= */
+/* --- STYLES FOR MOVIE CAROUSEL (Horizontal List) --- */
+/* ========================================= */
+.carousel--movie-type {
+    height: auto;
+    padding: 30px 0 50px;
+    background-color: white;
+    color: black;
+    text-align: center;
+}
+
+.carousel-movie-section-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--text-dark, #333);
+    margin: 0 auto 20px auto;
+    max-width: fit-content;
+    text-transform: uppercase;
+}
+
+.carousel--movie-type .carousel-movie-list-wrapper {
+    display: grid;
+    grid-auto-flow: column;
+    /* Updated grid-auto-columns for exactly 4 visible items plus gap */
+    /* Calculate gap percentage: For 4 items, there are 3 gaps. If gap is 20px, total gap width is 60px.
+       If list is 100% width, each item is (100% - 60px) / 4 */
+    grid-auto-columns: calc((100% - (3 * 20px)) / 4); /* Ensure 4 items fit exactly with 20px gap */
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    padding: 0 50px; /* Keep padding for the scrolling area */
+    gap: 20px; /* Space between movie cards */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    justify-content: flex-start;
+}
+
+/* ... (rest of the Carousel.css remains the same, including responsive adjustments) ... */
+
+/* Responsive Adjustments: Adjust grid-auto-columns for other breakpoints */
+@media (max-width: 1200px) {
+    .carousel--movie-type .carousel-movie-list-wrapper {
+        grid-auto-columns: calc((100% - (2 * 20px)) / 3); /* 3 items, 2 gaps */
+    }
+}
+
+@media (max-width: 1024px) {
+    .carousel--movie-type .carousel-movie-list-wrapper {
+        padding: 0 30px; /* Adjusted padding */
+        gap: 15px; /* Adjusted gap */
+        grid-auto-columns: calc((100% - (2 * 15px)) / 3); /* 3 items, 2 gaps, with new 15px gap */
+    }
+}
+
 @media (max-width: 768px){
-    .carousel-container { height: 50vh; }
-    .carousel-control { width: 40px; height: 40px; font-size: 1.5rem; }
+    .carousel--movie-type .carousel-movie-list-wrapper {
+        padding: 0 20px; /* Adjusted padding */
+        gap: 10px; /* Adjusted gap */
+        grid-auto-columns: calc((100% - (1 * 10px)) / 2); /* 2 items, 1 gap */
+    }
 }
 @media (max-width: 480px){
-    .carousel-control{ display:none; }  /* usa apenas swipe/dots */
+    .carousel--movie-type .carousel-movie-list-wrapper {
+        grid-auto-columns: 80%; /* Show almost 1 full item, allowing next to peek */
+        padding: 0 15px; /* Smaller padding */
+        gap: 15px;
+    }
+}
+
+/* Ensure placeholder styles are still present if needed */
+.carousel-placeholder {
+    color: #999;
+    text-align: center;
+    padding: 20px;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
+    background-color: #f0f0f0;
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.carousel-placeholder p {
+    margin: 0;
+}
+
+.carousel-error {
+    background-color: #ffe0e0;
+    color: #cc0000;
+    border-color: #ff0000;
 }
