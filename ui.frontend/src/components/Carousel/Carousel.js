@@ -1,162 +1,49 @@
-import React, {useEffect, useState, useCallback, useRef} from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { MapTo } from '@adobe/aem-react-editable-components';
 import CarouselItem from "../CarouselItem/CarouselItem";
 import MovieDisplay from "../Movie/MovieDisplay";
-import axios from 'axios';
+import { useMoviesData } from '../../hooks/useMovieData'; // Import the new hook
 
-import './Carousel.css'
+import './Carousel.css';
 
-const RESOURCE_TYPE = 'aem-cinema-react/components/carousel'
+const RESOURCE_TYPE = 'aem-cinema-react/components/carousel';
 
-const getAemHost = () => {
-    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-        return 'http://localhost:4502';
-    }
-    return typeof window !== 'undefined' ? window.location.origin : '';
-};
+
 
 const Carousel = (props) => {
-    console.log('Carousel: Component Rendered');
-    console.log('Carousel: Props received:', props);
+    // console.log('Carousel: Component Rendered');
+    // console.log('Carousel: Props received:', props);
 
     const [activeIndex, setActiveIndex] = useState(0);
-    const [fetchedMoviesData, setFetchedMoviesData] = useState([]); // State to hold fetched movie data
-    const [loadingMovies, setLoadingMovies] = useState(false);     // Loading state for movies
-    const [errorFetchingMovies, setErrorFetchingMovies] = useState(false); // Error state for movies
+    // Use states from the custom hook
+    const { moviesList, moviesListLoading, moviesListError, fetchMoviesList } = useMoviesData();
 
     const movieListRef = useRef(null);
-
-    // ... (goToNextItem and goToPrevItem for 'slide' type remain the same) ...
-
-    // NEW: Functions to handle scrolling for the movie list
-    const scrollMovieList = useCallback((direction) => {
-        if (movieListRef.current) {
-            const scrollAmount = 300; // Adjust this value based on how much you want to scroll per click
-                                      // A good value might be the width of one card + its gap
-            if (direction === 'next') {
-                movieListRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-            } else {
-                movieListRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-            }
-        }
-    }, []);
+    const intervalRef = useRef(null);
+    const [isTeleporting, setIsTeleporting] = useState(false);
 
     const contentType = props.contentType;
-    console.log('Carousel: Current contentType:', contentType);
-
-
-    // --- useEffect to fetch movies when contentType is 'movies' ---
-    useEffect(() => {
-        console.log('Carousel useEffect: contentType changed or component mounted. Checking fetch condition...');
-        if (contentType === "movies") {
-            console.log('Carousel useEffect: contentType is "movies", initiating movie fetch.');
-            const fetchMovies = async () => {
-                setLoadingMovies(true);
-                setErrorFetchingMovies(false);
-                setFetchedMoviesData([]); // Clear previous data on new fetch attempt
-                console.log('Carousel fetchMovies: Setting loadingMovies to true.');
-
-                try {
-                    const graphqlEndpoint = `${getAemHost()}/content/cq:graphql/aem-cinema-react/endpoint.json`;
-                    const query = `
-                        query GetFilmeList {
-                            filmeList {
-                                items {
-                                    _path
-                                    title
-                                    poster {
-                                        ... on ImageRef {
-                                            _path
-                                            mimeType
-                                        }
-                                    }
-                                    ageGroup
-                                    gender
-                                    movieTime
-                                }
-                            }
-                        }
-                    `;
-                    console.log('Carousel fetchMovies: GraphQL Endpoint:', graphqlEndpoint);
-                    console.log('Carousel fetchMovies: GraphQL Query:', query);
-
-
-                    const response = await axios.post(graphqlEndpoint, {
-                        query: query
-                    }, {
-                        withCredentials: true
-                    });
-
-                    console.log('Carousel fetchMovies: GraphQL Response:', response);
-
-                    if (response.data && response.data.data && response.data.data.filmeList && response.data.data.filmeList.items) {
-                        const moviesWithFullPosterPaths = response.data.data.filmeList.items.map(movie => ({
-                            ...movie,
-                            poster: movie.poster ? `${getAemHost()}${movie.poster._path}` : ''
-                        }));
-                        setFetchedMoviesData(moviesWithFullPosterPaths);
-                        console.log('Carousel fetchMovies: Successfully fetched movies. Data:', moviesWithFullPosterPaths);
-                    } else {
-                        setErrorFetchingMovies(true);
-                        console.error("Carousel: Failed to fetch movie list or data is empty.", response.data);
-                        console.log('Carousel fetchMovies: Setting errorFetchingMovies to true (data empty/malformed).');
-                    }
-                } catch (err) {
-                    console.error("Carousel: Error fetching movie list:", err);
-                    setErrorFetchingMovies(true);
-                    console.log('Carousel fetchMovies: Setting errorFetchingMovies to true (network error).');
-                } finally {
-                    setLoadingMovies(false);
-                    console.log('Carousel fetchMovies: Setting loadingMovies to false.');
-                }
-            };
-            fetchMovies();
-        } else {
-            console.log('Carousel useEffect: contentType is not "movies", skipping movie fetch.');
-        }
-    }, [contentType]);
-
-    let assets = [];
-    let allFetchedMovies = []; // For the horizontal movie list
-    let slidesForCarousel = []; // For the slide carousel
-
-    // --- Data Assignment Logic ---
-    console.log('Carousel: Applying Data Assignment Logic...');
-    if (contentType === "movies") {
-        if (!loadingMovies && !errorFetchingMovies) {
-            allFetchedMovies = fetchedMoviesData; // Use the entire fetched list for horizontal display
-            console.log('Carousel Data Logic (Movies): Using all fetchedMoviesData for horizontal display:', allFetchedMovies);
-        } else {
-            console.log('Carousel Data Logic (Movies): Not assigning, loadingMovies:', loadingMovies, 'errorFetchingMovies:', errorFetchingMovies);
-        }
-    } else if (contentType === "slide") {
-        assets = props.slides || [];
-        slidesForCarousel = assets; // Use assets directly for individual slides
-        console.log('Carousel Data Logic (Slides): Using props.slides as assets:', assets);
-    }
 
     let carouselData = [];
     let calculatedTotalItems = 0;
+    const numToDuplicate = 4;
 
-    // --- Determine active carousel data and total items ---
     if (contentType === "movies") {
-        carouselData = allFetchedMovies; // This holds the flat list of all movies
-        calculatedTotalItems = carouselData.length; // Total count of individual movies
-        console.log('Carousel: carouselData set to allFetchedMovies:', carouselData);
+        if (!moviesListLoading && !moviesListError && moviesList.length > 0) {
+            const head = moviesList.slice(-numToDuplicate);
+            const tail = moviesList.slice(0, numToDuplicate);
+            carouselData = [...head, ...moviesList, ...tail];
+            calculatedTotalItems = moviesList.length;
+        }
     } else if (contentType === "slide") {
-        carouselData = slidesForCarousel; // This holds the individual slides
-        calculatedTotalItems = carouselData.length; // Total count of slides
-        console.log('Carousel: carouselData set to slides assets:', carouselData);
+        carouselData = props.slides || [];
+        calculatedTotalItems = carouselData.length;
     }
-    console.log('Carousel: Calculated Total Items for Carousel:', calculatedTotalItems);
 
-
-    // These functions are for the "slide" type's automatic advance and button logic.
     const goToNextItem = useCallback(() => {
         setActiveIndex((prevIndex) => {
             if (calculatedTotalItems === 0) return 0;
             const newIndex = (prevIndex + 1) % calculatedTotalItems;
-            console.log('Carousel goToNextItem: Old Index:', prevIndex, 'New Index:', newIndex);
             return newIndex;
         });
     }, [calculatedTotalItems]);
@@ -165,34 +52,93 @@ const Carousel = (props) => {
         setActiveIndex((prevIndex) => {
             if (calculatedTotalItems === 0) return 0;
             const newIndex = (prevIndex - 1 + calculatedTotalItems) % calculatedTotalItems;
-            console.log('Carousel goToPrevItem: Old Index:', prevIndex, 'New Index:', newIndex);
             return newIndex;
         });
     }, [calculatedTotalItems]);
 
-    // Auto-advance interval (only for 'slide' type)
+    const scrollMovieList = useCallback((direction) => {
+        if (!movieListRef.current || moviesList.length === 0) return;
+
+        const container = movieListRef.current;
+        const item = container.querySelector('.cmp-movie-card');
+        if (!item) return;
+
+        const itemWidth = item.offsetWidth;
+        const gap = parseFloat(getComputedStyle(container).gap) || 0;
+        const scrollAmount = itemWidth + gap;
+
+        let newScrollLeft = container.scrollLeft;
+
+        if (direction === 'next') {
+            newScrollLeft += scrollAmount;
+            if (newScrollLeft >= (moviesList.length + numToDuplicate) * scrollAmount - container.clientWidth + 1) {
+                setIsTeleporting(true);
+                newScrollLeft = numToDuplicate * scrollAmount;
+            }
+        } else {
+            newScrollLeft -= scrollAmount;
+            if (newScrollLeft <= numToDuplicate * scrollAmount - 1) {
+                setIsTeleporting(true);
+                newScrollLeft = (moviesList.length + numToDuplicate - 1) * scrollAmount - container.clientWidth;
+            }
+        }
+        container.scrollTo({ left: newScrollLeft, behavior: 'smooth' });
+
+        if (isTeleporting) {
+            setTimeout(() => {
+                container.scrollTo({ left: newScrollLeft, behavior: 'auto' });
+                setIsTeleporting(false);
+            }, 300);
+        }
+    }, [moviesList.length, isTeleporting, numToDuplicate]); // Added numToDuplicate to dependencies
+
+    // Effect to trigger fetching the list of movies
     useEffect(() => {
-        console.log('Carousel Interval Effect: Checking calculatedTotalItems for auto-advance:', calculatedTotalItems);
+        if (contentType === "movies") {
+            fetchMoviesList(); // Call the fetch function from the hook
+        }
+    }, [contentType, fetchMoviesList]); // Depend on contentType and fetchMoviesList (from hook)
+
+    // 2. Effect for slide carousel auto-advance
+    useEffect(() => {
         if (contentType === "slide" && calculatedTotalItems > 1) {
-            console.log('Carousel Interval Effect: Auto-advance interval set for slide type.');
-            const interval = setInterval(() => {
+            clearInterval(intervalRef.current);
+            intervalRef.current = setInterval(() => {
                 goToNextItem();
             }, 5000);
             return () => {
-                clearInterval(interval);
-                console.log('Carousel Interval Effect: Auto-advance interval cleared.');
+                clearInterval(intervalRef.current);
             };
         } else {
-            console.log('Carousel Interval Effect: Skipping auto-advance (not slide type or not enough items).');
+            clearInterval(intervalRef.current);
         }
     }, [calculatedTotalItems, goToNextItem, contentType]);
 
+    // 3. Effect for movie carousel auto-scroll (optional)
+    useEffect(() => {
+        if (contentType === "movies" && moviesList.length > numToDuplicate) {
+            const autoScrollInterval = setInterval(() => {
+                scrollMovieList('next');
+            }, 8000);
+            return () => clearInterval(autoScrollInterval);
+        }
+    }, [contentType, moviesList.length, scrollMovieList, numToDuplicate]);
 
-    console.log('Carousel: Checking conditional rendering for loading/error/empty states.');
-    // Conditional rendering for loading/error/empty states
+    // 4. Effect to initialize movie carousel scroll position
+    useEffect(() => {
+        if (contentType === "movies" && movieListRef.current && moviesList.length > 0) {
+            const itemWidth = movieListRef.current.querySelector('.cmp-movie-card')?.offsetWidth || 250;
+            const gap = parseFloat(getComputedStyle(movieListRef.current).gap) || 20;
+            movieListRef.current.scrollTo({
+                left: numToDuplicate * (itemWidth + gap),
+                behavior: 'auto'
+            });
+        }
+    }, [contentType, moviesList.length, numToDuplicate]);
+
+    // --- CONDITIONAL RENDERING (AFTER ALL HOOKS ARE CALLED) ---
     if (contentType === "movies") {
-        if (loadingMovies) {
-            console.log('Carousel Render: Displaying movie loading state.');
+        if (moviesListLoading) {
             return (
                 <div className="carousel-placeholder">
                     <p>Carregando filmes para o carrossel...</p>
@@ -200,8 +146,7 @@ const Carousel = (props) => {
             );
         }
 
-        if (errorFetchingMovies) {
-            console.log('Carousel Render: Displaying movie error state.');
+        if (moviesListError) {
             return (
                 <div className="carousel-placeholder carousel-error">
                     <p>Erro ao carregar filmes para o carrossel. Por favor, tente novamente.</p>
@@ -209,8 +154,7 @@ const Carousel = (props) => {
             );
         }
 
-        if (calculatedTotalItems === 0) {
-            console.log('Carousel Render: Displaying no movies found state.');
+        if (moviesList.length === 0) {
             return (
                 <div className="carousel-placeholder">
                     <p>Nenhum filme configurado ou encontrado para o carrossel.</p>
@@ -219,7 +163,6 @@ const Carousel = (props) => {
             );
         }
     } else if (contentType === "slide" && calculatedTotalItems === 0) {
-        console.log('Carousel Render: Displaying no slides found state.');
         return (
             <div className="carousel-placeholder">
                 <p>Nenhum slide configurado para o carrossel.</p>
@@ -228,7 +171,7 @@ const Carousel = (props) => {
         );
     }
 
-    console.log('Carousel Render: Rendering main carousel content.');
+    // --- MAIN RENDER ---
     return (
         <div>
             {/* --- SLIDE CONTENT --- */}
@@ -236,7 +179,6 @@ const Carousel = (props) => {
                 <div className="carousel-container carousel--slide-type">
                     <div className="carousel-slides-wrapper">
                         {carouselData.map((item, index) => (
-                            // Using the original CarouselItem for the slide type
                             <CarouselItem key={index} {...item} isActive={index === activeIndex} />
                         ))}
                     </div>
@@ -267,29 +209,22 @@ const Carousel = (props) => {
             {/* --- MOVIE CONTENT --- */}
             {contentType === "movies" && (
                 <div className="carousel-container carousel--movie-type">
-                    {/* Title for the movie section */}
                     <h2 className="carousel-movie-section-title">PROGRAMAÇÃO</h2>
 
-                    <div className="carousel-movie-list-wrapper">
+                    <div className="carousel-movie-list-wrapper" ref={movieListRef}>
                         {carouselData.map((movie, index) => (
-                            <MovieDisplay key={index} movie={movie} />
+                            <MovieDisplay key={`${movie._path || movie.title}-${index}`} movie={movie} />
                         ))}
                     </div>
 
-                    {/* Navigation buttons for horizontal scroll.
-                        Note: These buttons won't automatically scroll the list without
-                        additional JavaScript logic (e.g., using useRef and scrollIntoView or scrollLeft).
-                        For now, they just render and you'll need to add scroll event handlers.
-                    */}
-                    {calculatedTotalItems > 3 && ( // Only show buttons if there are more movies than can fit in one view
+                    {moviesList.length > numToDuplicate && (
                         <>
-                            <button className="carousel-control prev" aria-label="Anterior">
+                            <button className="carousel-control prev" onClick={() => scrollMovieList('prev')} aria-label="Anterior">
                                 &#10094;
                             </button>
-                            <button className="carousel-control next" aria-label="Próximo">
+                            <button className="carousel-control next" onClick={() => scrollMovieList('next')} aria-label="Próximo">
                                 &#10095;
                             </button>
-                            {/* Indicators are typically not used for a continuous scrollable list */}
                         </>
                     )}
                 </div>
