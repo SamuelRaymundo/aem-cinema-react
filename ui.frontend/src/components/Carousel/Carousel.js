@@ -1,22 +1,54 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { MapTo } from '@adobe/aem-react-editable-components';
+import axios from 'axios'; // Import axios directly here
 import CarouselItem from "../CarouselItem/CarouselItem";
 import MovieDisplay from "../Movie/MovieDisplay";
-import { useMoviesData } from '../../hooks/useMovieData'; // Import the new hook
 
 import './Carousel.css';
 
-const RESOURCE_TYPE = 'aem-cinema-react/components/carousel';
+// Helper to get AEM Host
+const getAemHost = () => {
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+        return 'http://localhost:4502';
+    }
+    return typeof window !== 'undefined' ? window.location.origin : '';
+};
 
+// GraphQL endpoint for your AEM project
+const graphqlEndpoint = `${getAemHost()}/content/cq:graphql/aem-cinema-react/endpoint.json`;
 
+// GraphQL Query for fetching a list of movies (for carousel/list views)
+// IMPORTANT: This query DOES NOT include the 'sinopse' field.
+const GET_FILME_LIST_QUERY = `
+    query GetFilmeList {
+        filmeList {
+            items {
+                _path
+                title
+                poster {
+                    ... on ImageRef {
+                        _path
+                        mimeType
+                    }
+                }
+                ageGroup
+                gender
+                movieTime
+            }
+        }
+    }
+`;
+
+// Define the AEM sling:resourceType for the Carousel component
+const CAROUSEL_RESOURCE_TYPE = 'aem-cinema-react/components/carousel';
 
 const Carousel = (props) => {
-    // console.log('Carousel: Component Rendered');
-    // console.log('Carousel: Props received:', props);
-
     const [activeIndex, setActiveIndex] = useState(0);
-    // Use states from the custom hook
-    const { moviesList, moviesListLoading, moviesListError, fetchMoviesList } = useMoviesData();
+
+    // States for movie list data directly within Carousel
+    const [moviesList, setMoviesList] = useState([]);
+    const [moviesListLoading, setMoviesListLoading] = useState(false);
+    const [moviesListError, setMoviesListError] = useState(false);
 
     const movieListRef = useRef(null);
     const intervalRef = useRef(null);
@@ -28,6 +60,32 @@ const Carousel = (props) => {
     let calculatedTotalItems = 0;
     const numToDuplicate = 4;
 
+    // Function to fetch the list of movies (now internal to Carousel)
+    const fetchMoviesList = useCallback(async () => {
+        setMoviesListLoading(true);
+        setMoviesListError(false);
+        setMoviesList([]);
+        try {
+            const response = await axios.post(graphqlEndpoint, { query: GET_FILME_LIST_QUERY }, { withCredentials: true });
+            if (response.data?.data?.filmeList?.items) {
+                const moviesWithFullPosterPaths = response.data.data.filmeList.items.map(movie => ({
+                    ...movie,
+                    poster: movie.poster ? `${getAemHost()}${movie.poster._path}` : ''
+                }));
+                setMoviesList(moviesWithFullPosterPaths);
+            } else {
+                setMoviesListError(true);
+                console.error("Carousel: No movie items found or unexpected GraphQL response for list.", response.data);
+            }
+        } catch (err) {
+            setMoviesListError(true);
+            console.error("Carousel: Error fetching movie list:", err);
+        } finally {
+            setMoviesListLoading(false);
+        }
+    }, []); // Empty dependency array, function created once
+
+    // Prepare data based on content type
     if (contentType === "movies") {
         if (!moviesListLoading && !moviesListError && moviesList.length > 0) {
             const head = moviesList.slice(-numToDuplicate);
@@ -90,16 +148,16 @@ const Carousel = (props) => {
                 setIsTeleporting(false);
             }, 300);
         }
-    }, [moviesList.length, isTeleporting, numToDuplicate]); // Added numToDuplicate to dependencies
+    }, [moviesList.length, isTeleporting, numToDuplicate]);
 
-    // Effect to trigger fetching the list of movies
+    // Effect to trigger fetching the list of movies for 'movies' content type
     useEffect(() => {
         if (contentType === "movies") {
-            fetchMoviesList(); // Call the fetch function from the hook
+            fetchMoviesList(); // Call the fetch function directly from here
         }
-    }, [contentType, fetchMoviesList]); // Depend on contentType and fetchMoviesList (from hook)
+    }, [contentType, fetchMoviesList]);
 
-    // 2. Effect for slide carousel auto-advance
+    // Effect for generic slide carousel auto-advance
     useEffect(() => {
         if (contentType === "slide" && calculatedTotalItems > 1) {
             clearInterval(intervalRef.current);
@@ -114,7 +172,7 @@ const Carousel = (props) => {
         }
     }, [calculatedTotalItems, goToNextItem, contentType]);
 
-    // 3. Effect for movie carousel auto-scroll (optional)
+    // Effect for movie carousel auto-scroll
     useEffect(() => {
         if (contentType === "movies" && moviesList.length > numToDuplicate) {
             const autoScrollInterval = setInterval(() => {
@@ -124,7 +182,7 @@ const Carousel = (props) => {
         }
     }, [contentType, moviesList.length, scrollMovieList, numToDuplicate]);
 
-    // 4. Effect to initialize movie carousel scroll position
+    // Effect to initialize movie carousel scroll position
     useEffect(() => {
         if (contentType === "movies" && movieListRef.current && moviesList.length > 0) {
             const itemWidth = movieListRef.current.querySelector('.cmp-movie-card')?.offsetWidth || 250;
@@ -136,7 +194,7 @@ const Carousel = (props) => {
         }
     }, [contentType, moviesList.length, numToDuplicate]);
 
-    // --- CONDITIONAL RENDERING (AFTER ALL HOOKS ARE CALLED) ---
+    // --- CONDITIONAL RENDERING FOR LOADING/ERROR/EMPTY STATES ---
     if (contentType === "movies") {
         if (moviesListLoading) {
             return (
@@ -171,10 +229,10 @@ const Carousel = (props) => {
         );
     }
 
-    // --- MAIN RENDER ---
+    // --- MAIN RENDER LOGIC ---
     return (
         <div>
-            {/* --- SLIDE CONTENT --- */}
+            {/* Render for SLIDE content type */}
             {contentType === "slide" && (
                 <div className="carousel-container carousel--slide-type">
                     <div className="carousel-slides-wrapper">
@@ -206,7 +264,7 @@ const Carousel = (props) => {
                 </div>
             )}
 
-            {/* --- MOVIE CONTENT --- */}
+            {/* Render for MOVIE content type */}
             {contentType === "movies" && (
                 <div className="carousel-container carousel--movie-type">
                     <h2 className="carousel-movie-section-title">PROGRAMAÇÃO</h2>
@@ -233,6 +291,8 @@ const Carousel = (props) => {
     );
 };
 
-MapTo(RESOURCE_TYPE)(Carousel);
+// Map the React Carousel component to the AEM component's sling:resourceType
+const CAROUSEL_RESOURCE_TYPE_AEM = 'aem-cinema-react/components/carousel';
+MapTo(CAROUSEL_RESOURCE_TYPE_AEM)(Carousel);
 
 export default Carousel;
