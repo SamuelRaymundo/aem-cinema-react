@@ -1,86 +1,82 @@
 /* ui.frontend/src/components/MovieDisplay/MovieDisplay.css */
 
-/* --- Overall MovieDisplay Card --- */
+/* --- Overall MovieDisplay Card (Base Styles for all cards, including detail page) --- */
 .cmp-movie-card {
     /* Main container properties */
-    width: 250px; /* Adjust as needed for your layout */
     background-color: #2F2F2F; /* Dark background for the bottom section */
     border-radius: 12px; /* Rounded corners for the entire card */
     overflow: hidden; /* Ensures content respects border-radius */
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); /* Stronger shadow */
     font-family: 'Segoe UI', Arial, sans-serif; /* Modern font */
     color: white; /* Default text color for the dark section */
-    margin-bottom: 25px; /* Spacing between cards if in a list */
     display: flex;
     flex-direction: column;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* Smooth transitions */
 }
+
+/* Specific styles for cards in a list/carousel (when NOT a detail page) */
+.cmp-movie-card:not(.cmp-movie-card--detail-page) {
+    width: 250px; /* Fixed width for list items */
+    margin-bottom: 25px; /* Spacing between cards if in a list */
+    cursor: pointer; /* Indicate it's clickable */
+}
+
+.cmp-movie-card:not(.cmp-movie-card--detail-page):hover {
+    transform: translateY(-5px); /* Lift effect on hover */
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.6); /* More intense shadow on hover */
+}
+
 
 /* --- Poster Section (Top part of the card) --- */
 .cmp-movie__poster-section {
     position: relative;
     width: 100%;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    overflow: hidden;
+    /* Apply border-radius dynamically to match card, but ensure it doesn't clip on hover */
+    border-top-left-radius: inherit; /* Inherit from parent .cmp-movie-card */
+    border-top-right-radius: inherit; /* Inherit from parent .cmp-movie-card */
+    overflow: hidden; /* Important for rounding images */
 }
 
 .cmp-movie__poster {
     display: block;
     width: 100%;
     height: auto;
+    object-fit: cover; /* Ensures image covers area without distortion */
 }
 
 /* --- Age Group Overlay (Base Style) --- */
 .cmp-movie__age-group-overlay {
     position: absolute;
-    bottom: 15px; /* Adjusted position slightly */
-    right: 15px; /* Adjusted position slightly */
+    bottom: 15px;
+    right: 15px;
     color: white;
     padding: 5px 10px;
-    border-radius: 5px; /* Slightly more rounded */
-    font-size: 1.1em; /* Slightly larger font */
+    border-radius: 5px;
+    font-size: 1.1em;
     font-weight: bold;
     text-align: center;
-    width: 35px; /* Fixed width for the badge */
-    height: 35px; /* Fixed height for the badge */
-    display: flex; /* Use flexbox to center content */
+    width: 35px;
+    height: 35px;
+    display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 1px 1px 3px rgba(0,0,0,0.3); /* Small shadow */
-    margin: 0; /* Remove default paragraph margin */
-    z-index: 1; /* Ensure it's above the poster */
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    margin: 0;
+    z-index: 1;
 }
 
 /* --- Dynamic Age Group Colors --- */
-.cmp-movie__age-group-overlay--green {
-    background-color: #4CAF50; /* Green */
-}
-
-.cmp-movie__age-group-overlay--blue {
-    background-color: #2196F3; /* Blue */
-}
-
-.cmp-movie__age-group-overlay--yellow {
-    background-color: #FFEB3B; /* Yellow */
-    color: #333; /* Darker text for yellow background */
-}
-
-.cmp-movie__age-group-overlay--orange {
-    background-color: #FF9800; /* Orange */
-}
-
-.cmp-movie__age-group-overlay--red {
-    background-color: #F44336; /* Red */
-}
-
-.cmp-movie__age-group-overlay--black {
-    background-color: #333; /* Dark Grey/Black */
-}
+.cmp-movie__age-group-overlay--green { background-color: #4CAF50; }
+.cmp-movie__age-group-overlay--blue { background-color: #2196F3; }
+.cmp-movie__age-group-overlay--yellow { background-color: #FFEB3B; color: #333; } /* Darker text */
+.cmp-movie__age-group-overlay--orange { background-color: #FF9800; }
+.cmp-movie__age-group-overlay--red { background-color: #F44336; }
+.cmp-movie__age-group-overlay--black { background-color: #333; }
 
 
 /* --- Details Section (Bottom dark part of the card) --- */
 .cmp-movie__details-section {
-    padding: 15px 15px 20px 15px; /* Top, right, bottom, left padding */
+    padding: 15px 15px 20px 15px;
     background-color: #2F2F2F; /* Dark background */
     border-bottom-left-radius: 12px;
     border-bottom-right-radius: 12px;
@@ -89,7 +85,7 @@
     justify-content: space-between;
     flex-grow: 1;
     position: relative;
-    min-height: 80px;
+    min-height: 80px; /* Ensure some height for content */
     text-align: left;
 }
 
@@ -99,7 +95,7 @@
     font-weight: 600;
     margin: 0 0 8px 0;
     line-height: 1.3;
-    padding-right: 30px;
+    /* padding-right: 30px; */ /* Removed for consistency, adjust if badge overlaps */
 }
 
 .cmp-movie__meta-info {
@@ -124,7 +120,6 @@
     color: #888;
 }
 
-
 /* --- Placeholder for Editor --- */
 .cmp-movie__placeholder {
     color: #999;
@@ -137,6 +132,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%; /* Make placeholder fill container */
+    max-width: 500px; /* Prevent it from being too wide */
+    margin: 20px auto; /* Center placeholder too */
 }
 
 .cmp-movie__placeholder p {
@@ -144,8 +142,121 @@
 }
 
 /* Ensure these are still hidden if not used (from previous versions) */
-.cmp-movie__synopsis,
+.cmp-movie__synopsis, /* This needs to be overridden for detail page */
 .cmp-movie__release-date,
 .cmp-movie__linked-cf {
-    display: none;
+    /* display: none; */ /* Only use if these elements exist in HTML and need to be hidden globally */
+}
+
+/* ========================================================================= */
+/* --- NEW & MODIFIED STYLES FOR THE MOVIE DETAIL PAGE (`isDetailPage`) --- */
+/* ========================================================================= */
+
+.cmp-movie-card--detail-page {
+    width: auto; /* Remove fixed width */
+    max-width: 1000px; /* Constrain max width for readability */
+    margin: 40px auto; /* Center horizontally with auto margins and add vertical space */
+    flex-direction: row; /* Arrange poster and details side-by-side */
+    align-items: flex-start; /* Align content to the top */
+    padding: 30px; /* Generous padding inside the card */
+    gap: 40px; /* Space between poster and details sections */
+    border-radius: 12px; /* Ensure consistency */
+}
+
+.cmp-movie-card--detail-page .cmp-movie__poster-section {
+    flex-shrink: 0; /* Prevent poster from shrinking */
+    width: 350px; /* Fixed width for the detail page poster */
+    height: auto; /* Adjust height based on aspect ratio */
+}
+
+.cmp-movie-card--detail-page .cmp-movie__poster {
+    border-radius: 8px; /* Slightly rounded corners for the poster image */
+}
+
+.cmp-movie-card--detail-page .cmp-movie__details-section {
+    background-color: transparent; /* Remove dark background, let parent handle it */
+    padding: 0; /* Remove padding as parent has it */
+    min-height: auto; /* No fixed min-height for detail page */
+    text-align: left; /* Ensure text is left-aligned */
+}
+
+.cmp-movie-card--detail-page .cmp-movie__title {
+    font-size: 3.2em; /* Much larger title for detail page */
+    margin-bottom: 15px;
+    line-height: 1.1;
+    color: #e0e0e0; /* Slightly lighter for headings */
+}
+
+.cmp-movie-card--detail-page .cmp-movie__meta-info {
+    font-size: 1.1em;
+    margin-bottom: 25px;
+    color: #c0c0c0; /* Slightly lighter meta info */
+}
+
+/* Styles for the sinopse (synopsis) on the detail page */
+.cmp-movie-card--detail-page .cmp-movie__sinopse {
+    font-size: 1.15em;
+    line-height: 1.7;
+    color: #ddd; /* Readable color for main text */
+    margin-top: 20px; /* Space from meta info */
+    text-align: justify; /* Justify text for a clean block look */
+}
+
+/* Ensure images within sinopse are styled correctly */
+.cmp-movie-card--detail-page .cmp-movie__sinopse img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 15px 0;
+    border-radius: 5px;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 900px) {
+    .cmp-movie-card--detail-page {
+        flex-direction: column; /* Stack poster and details vertically */
+        align-items: center; /* Center items when stacked */
+        padding: 25px;
+        gap: 25px;
+        margin: 25px auto;
+        max-width: 90%; /* Adjust max-width for smaller screens */
+    }
+
+    .cmp-movie-card--detail-page .cmp-movie__poster-section {
+        width: 70%; /* Poster takes more width on smaller screens when stacked */
+        max-width: 300px; /* Maintain a reasonable max-width */
+    }
+
+    .cmp-movie-card--detail-page .cmp-movie__title {
+        font-size: 2.5em; /* Adjust title size for smaller screens */
+        text-align: center; /* Center title when stacked */
+    }
+
+    .cmp-movie-card--detail-page .cmp-movie__meta-info {
+        justify-content: center; /* Center meta info when stacked */
+    }
+
+    .cmp-movie-card--detail-page .cmp-movie__details-section {
+        width: 100%; /* Take full width when stacked */
+    }
+}
+
+@media (max-width: 500px) {
+    .cmp-movie-card--detail-page {
+        padding: 15px;
+        gap: 15px;
+        margin: 15px auto;
+    }
+
+    .cmp-movie-card--detail-page .cmp-movie__poster-section {
+        width: 80%;
+    }
+
+    .cmp-movie-card--detail-page .cmp-movie__title {
+        font-size: 2em;
+    }
+
+    .cmp-movie-card--detail-page .cmp-movie__sinopse {
+        font-size: 1em;
+    }
 }

@@ -332,13 +332,16 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
                     {gender && <span className="cmp-movie__gender">{gender}</span>}
                     {gender && movieTime && <span className="cmp-movie__meta-separator"> • </span>}
                     {movieTime && <span className="cmp-movie__time">{movieTime}m</span>}
+                    <h4>Sinopse</h4>
                 </div>
                 {/* SINOPSE IS ONLY RENDERED IF 'isDetailPage' IS TRUE AND sinopse.html EXISTS */}
                 {isDetailPage && sinopse && sinopse.html && (
+
                     <div
                         className="cmp-movie__sinopse"
                         dangerouslySetInnerHTML={{ __html: sinopse.html }}
                     />
+
                 )}
             </div>
         </div>
