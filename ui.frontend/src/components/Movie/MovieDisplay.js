@@ -67,7 +67,7 @@ const GET_FILME_LIST_FULL_QUERY = `
     query GetFilmeListFull {
         filmeList{
             items{
-              _path 
+              _path
               title
               poster{
                 ... on ImageRef {
@@ -123,20 +123,15 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
 
-    // Determine the movie data to display: prioritize 'movie' prop, then fetched data
-    // This will now only apply if it's a single movie display
     const currentMovieData = movie || fetchedMovieData;
 
-    // Detect if current page is the detail page
     const isDetailPage = typeof window !== 'undefined' &&
         window.location.pathname === MOVIE_DETAIL_PAGE_PATH &&
         new URLSearchParams(window.location.search).has('slug');
 
-    // Detect if current page is the movie list page
     const isMovieListPage = typeof window !== 'undefined' &&
         window.location.pathname === MOVIE_LIST_PAGE_PATH;
 
-    // Effect for logging current state and props (helpful for debugging)
     useEffect(() => {
         console.log("MovieDisplay Debug: --- COMPONENT MOUNT/UPDATE ---");
         console.log(`MovieDisplay Debug: Current URL: ${window.location.pathname}${window.location.search}`);
@@ -147,17 +142,15 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
         console.log("MovieDisplay Debug: -----------------------------");
     }, [isDetailPage, isMovieListPage, movie, fragmentPath]);
 
-    // Main useEffect for data fetching logic
     useEffect(() => {
         console.log("MovieDisplay Debug: Entering data fetching useEffect.");
 
-        // If 'movie' prop is provided (from Carousel), use it directly for single display.
-        if (movie && !isMovieListPage) { // Ensure we don't use this prop if we're on the list page
+        if (movie && !isMovieListPage) {
             console.log("MovieDisplay Debug: Using 'movie' prop data (from list/carousel). No new fetch needed.");
             setLoading(false);
             setError(false);
-            setFetchedMovieData(null); // Clear fetched data if using prop
-            setMovieList([]); // Clear movie list
+            setFetchedMovieData(null);
+            setMovieList([]);
             return;
         }
 
@@ -167,8 +160,8 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
             const fetchMovieList = async () => {
                 setLoading(true);
                 setError(false);
-                setMovieList([]); // Clear previous list data
-                setFetchedMovieData(null); // Ensure single movie data is clear
+                setMovieList([]);
+                setFetchedMovieData(null);
 
                 try {
                     console.log(`MovieDisplay Debug: Sending GraphQL query for list to ${graphqlEndpoint}`);
@@ -205,7 +198,7 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
                 }
             };
             fetchMovieList();
-            return; // Exit this useEffect as we handled the list page
+            return;
         }
 
         // --- Logic for Detail Page or Standalone Component ---
@@ -220,14 +213,11 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
                 return;
             }
         } else if (fragmentPath) {
-            // If it's a standalone component on a non-detail/non-list page and has a fragmentPath prop
-            // Extract slug from fragmentPath. This will be used for fetch WITHOUT sinopse.
             const pathParts = fragmentPath.split('/');
             targetFragmentSlug = pathParts[pathParts.length - 1];
             console.log(`MovieDisplay Debug: Using 'fragmentPath' prop for standalone display. Original: '${fragmentPath}', Extracted slug: '${targetFragmentSlug}'`);
         }
 
-        // Now, if we have a targetFragmentSlug, construct the full CF path and fetch a single movie.
         if (targetFragmentSlug) {
             const cfNameFromSlug = formatTitleForUrl(targetFragmentSlug);
             const targetFragmentPath = `/content/dam/aem-cinema-react/movies-/${cfNameFromSlug}`;
@@ -236,15 +226,14 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
             const fetchMovieData = async () => {
                 setLoading(true);
                 setError(false);
-                setFetchedMovieData(null); // Clear previous data
-                setMovieList([]); // Ensure movie list is clear
+                setFetchedMovieData(null);
+                setMovieList([]);
                 let query;
-                let dataProcessor = (item) => ({ // Base processor
+                let dataProcessor = (item) => ({
                     ...item,
                     poster: item.poster ? `${getAemHost()}${item.poster._path}` : ''
                 });
 
-                // DECIDE WHICH GraphQL QUERY TO USE:
                 if (isDetailPage) {
                     console.log("MovieDisplay Debug: Fetching FULL movie details (from slug) for detail page.");
                     query = GET_FILME_BY_PATH_FULL_QUERY;
@@ -300,19 +289,16 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
                 }
             };
             fetchMovieData();
-        } else if (!isMovieListPage && !movie) { // Only log this if it's not a list page and no movie prop
+        } else if (!isMovieListPage && !movie) {
             console.log("MovieDisplay Debug: No valid source for movie data found (neither prop, nor URL slug, nor fragmentPath prop, nor list page). Not fetching single movie.");
             setLoading(false);
             setFetchedMovieData(null);
         }
-    }, [movie, fragmentPath, isDetailPage, isMovieListPage]); // Dependencies for useEffect
+    }, [movie, fragmentPath, isDetailPage, isMovieListPage]);
 
-    // Function to handle poster click and navigate to the detail page
     const handlePosterClick = useCallback((clickedMovie) => {
-        // Use clickedMovie if provided (from map iteration), otherwise fall back to currentMovieData
         const movieToNavigate = clickedMovie || currentMovieData;
 
-        // Prevent navigation if already on the detail page or if essential movie data is missing
         if (!movieToNavigate?._path || !movieToNavigate?.title || isDetailPage) {
             if (isDetailPage) {
                 console.log("MovieDisplay Debug: handlePosterClick: Already on detail page, not navigating.");
@@ -327,15 +313,13 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
 
         console.log("MovieDisplay Debug: handlePosterClick: Navigating to movie detail page:", navigateTo);
 
-        // Handle navigation based on AEM editor status
         if (window.location.href.includes('/editor.html')) {
             window.location.assign(`${getAemHost()}/editor.html${MOVIE_DETAIL_PAGE_PATH}?slug=${formattedTitle}&wcmmode=disabled`);
         } else {
-            window.location.assign(`${navigateTo}&wcmmode=disabled`); // Add wcmmode for consistency in preview
+            window.location.assign(`${navigateTo}&wcmmode=disabled`);
         }
-    }, [currentMovieData, isDetailPage]); // Added currentMovieData to dependencies
+    }, [currentMovieData, isDetailPage]);
 
-    // Render loading/error/placeholder states
     if (loading) {
         console.log("MovieDisplay Debug: Rendering: Loading state.");
         return (
@@ -354,8 +338,6 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
         );
     }
 
-    // Show configuration message if no data and component needs configuration (e.g., in AEM editor)
-    // This applies if it's a standalone component and not a detail/list page
     if (!currentMovieData && !movieList.length && !isDetailPage && !isMovieListPage && fragmentPath) {
         console.log("MovieDisplay Debug: Rendering: Configuration prompt (no data, but fragmentPath provided).");
         return (
@@ -383,24 +365,39 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
                     {movieList.map((movieItem) => {
                         const ageGroupColorClass = movieItem.ageGroup ? getAgeGroupColorClass(movieItem.ageGroup) : '';
                         return (
-                            <div className="cmp-movie-card" key={movieItem._path}>
-                                {movieItem.poster && (
-                                    <div className="cmp-movie__poster-section" onClick={() => handlePosterClick(movieItem)} style={{ cursor: 'pointer' }}>
-                                        <img className="cmp-movie__poster" src={movieItem.poster} alt={`${movieItem.title || 'Movie'} Poster`} />
-                                        {movieItem.ageGroup && (
-                                            <p className={`cmp-movie__age-group-overlay ${ageGroupColorClass}`}>
-                                                {movieItem.ageGroup}
-                                            </p>
-                                        )}
-                                    </div>
-                                )}
-                                <div className="cmp-movie__details-section">
-                                    {movieItem.title && <h2 className="cmp-movie__title">{movieItem.title}</h2>}
+                            <div className="cmp-movie-card" key={movieItem._path} onClick={() => handlePosterClick(movieItem)}>
+                                {/* New wrapper for poster and title/age group block */}
+                                <div className="cmp-movie__poster-title-block">
+                                    {movieItem.poster && (
+                                        <div className="cmp-movie__poster-section">
+                                            <img className="cmp-movie__poster" src={movieItem.poster} alt={`${movieItem.title || 'Movie'} Poster`} />
+                                            {/* Age group overlay remains on poster for list view */}
+                                            {movieItem.ageGroup && (
+                                                <p className={`cmp-movie__age-group-overlay ${ageGroupColorClass}`}>
+                                                    {movieItem.ageGroup}
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* New wrapper for meta-info and sinopse block */}
+                                <div className="cmp-movie__sinopse-meta-block">
+                                    <h2 className="cmp-movie__title">
+                                        {movieItem.title}
+                                        {/* Age group badge next to title if desired, currently overlayed */}
+                                    </h2>
                                     <div className="cmp-movie__meta-info">
                                         {movieItem.gender && <span className="cmp-movie__gender">{movieItem.gender}</span>}
                                         {movieItem.gender && movieItem.movieTime && <span className="cmp-movie__meta-separator"> • </span>}
                                         {movieItem.movieTime && <span className="cmp-movie__time">{movieItem.movieTime}m</span>}
                                     </div>
+                                    {movieItem.sinopse && movieItem.sinopse.html && (
+                                        <div
+                                            className="cmp-movie__sinopse"
+                                            dangerouslySetInnerHTML={{ __html: movieItem.sinopse.html }}
+                                        />
+                                    )}
                                 </div>
                             </div>
                         );
@@ -413,7 +410,6 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
     // Don't render anything if no data is available and no configuration prompt is applicable
     if (!currentMovieData) {
         console.log("MovieDisplay Debug: Rendering: No data available to render (single movie context).");
-        // If it's a detail page but no data could be fetched for the slug
         if (isDetailPage) {
             console.log("MovieDisplay Debug: Rendering: Detail page, but movie not found for slug.");
             return (
@@ -429,6 +425,7 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
     console.log("MovieDisplay Debug: currentMovieData (at final render):", currentMovieData);
     console.log("MovieDisplay Debug: isDetailPage (at final render):", isDetailPage);
 
+
     // Destructure movie data for rendering a single movie
     const { title, poster, ageGroup, gender, movieTime, sinopse } = currentMovieData;
     const ageGroupColorClass = ageGroup ? getAgeGroupColorClass(ageGroup) : '';
@@ -440,6 +437,7 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
             {poster && (
                 <div className="cmp-movie__poster-section" onClick={() => handlePosterClick(currentMovieData)} style={{ cursor: isDetailPage ? 'default' : 'pointer' }}>
                     <img className="cmp-movie__poster" src={poster} alt={`${title || 'Movie'} Poster`} />
+                    {/* Age group remains as an overlay for non-list views */}
                     {ageGroup && (
                         <p className={`cmp-movie__age-group-overlay ${ageGroupColorClass}`}>
                             {ageGroup}
@@ -454,9 +452,8 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
                     {gender && <span className="cmp-movie__gender">{gender}</span>}
                     {gender && movieTime && <span className="cmp-movie__meta-separator"> • </span>}
                     {movieTime && <span className="cmp-movie__time">{movieTime}m</span>}
-                    {isDetailPage && <h4>Sinopse</h4>} {/* Only show "Sinopse" heading on detail page */}
+                    {isDetailPage && <h4>Sinopse</h4>}
                 </div>
-                {/* SINOPSE IS ONLY RENDERED IF 'isDetailPage' IS TRUE AND sinopse.html EXISTS */}
                 {isDetailPage && sinopse && sinopse.html && (
                     <div
                         className="cmp-movie__sinopse"

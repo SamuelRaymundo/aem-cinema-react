@@ -3,45 +3,44 @@
 /* --- Overall MovieDisplay Card (Base Styles for all cards, including detail page) --- */
 .cmp-movie-card {
     /* Main container properties */
-    background-color: #2F2F2F; /* Dark background for the bottom section */
+    background-color: #2F2F2F; /* Dark background for the entire card (now also for list items) */
     border-radius: 12px; /* Rounded corners for the entire card */
     overflow: hidden; /* Ensures content respects border-radius */
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); /* Stronger shadow */
     font-family: 'Segoe UI', Arial, sans-serif; /* Modern font */
     color: white; /* Default text color for the dark section */
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* Default for single cards (carousel/standalone) */
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* Smooth transitions */
 }
 
 /* Specific styles for cards in a list/carousel (when NOT a detail page) */
-.cmp-movie-card:not(.cmp-movie-card--detail-page) {
-    width: 250px; /* Fixed width for list items */
+.cmp-movie-card:not(.cmp-movie-card--detail-page):not(.cmp-movie-list .cmp-movie-card) {
+    width: 250px; /* Fixed width for standalone/carousel items, explicitly exclude list items */
     margin-bottom: 25px; /* Spacing between cards if in a list */
     cursor: pointer; /* Indicate it's clickable */
 }
 
-.cmp-movie-card:not(.cmp-movie-card--detail-page):hover {
+.cmp-movie-card:not(.cmp-movie-card--detail-page):not(.cmp-movie-list .cmp-movie-card):hover {
     transform: translateY(-5px); /* Lift effect on hover */
     box-shadow: 0 12px 25px rgba(0, 0, 0, 0.6); /* More intense shadow on hover */
 }
 
 
-/* --- Poster Section (Top part of the card) --- */
+/* --- Poster Section (Base Styles) --- */
 .cmp-movie__poster-section {
     position: relative;
     width: 100%;
-    /* Apply border-radius dynamically to match card, but ensure it doesn't clip on hover */
-    border-top-left-radius: inherit; /* Inherit from parent .cmp-movie-card */
-    border-top-right-radius: inherit; /* Inherit from parent .cmp-movie-card */
-    overflow: hidden; /* Important for rounding images */
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
+    overflow: hidden;
 }
 
 .cmp-movie__poster {
     display: block;
     width: 100%;
     height: auto;
-    object-fit: cover; /* Ensures image covers area without distortion */
+    object-fit: cover;
 }
 
 /* --- Age Group Overlay (Base Style) --- */
@@ -74,10 +73,10 @@
 .cmp-movie__age-group-overlay--black { background-color: #333; }
 
 
-/* --- Details Section (Bottom dark part of the card) --- */
+/* --- Details Section (Base Styles) --- */
 .cmp-movie__details-section {
     padding: 15px 15px 20px 15px;
-    background-color: #2F2F2F; /* Dark background */
+    /* Background and specific padding handled by context (detail/list) */
     border-bottom-left-radius: 12px;
     border-bottom-right-radius: 12px;
     display: flex;
@@ -85,7 +84,7 @@
     justify-content: space-between;
     flex-grow: 1;
     position: relative;
-    min-height: 80px; /* Ensure some height for content */
+    min-height: 80px;
     text-align: left;
 }
 
@@ -95,7 +94,6 @@
     font-weight: 600;
     margin: 0 0 8px 0;
     line-height: 1.3;
-    /* padding-right: 30px; */ /* Removed for consistency, adjust if badge overlaps */
 }
 
 .cmp-movie__meta-info {
@@ -132,131 +130,264 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%; /* Make placeholder fill container */
-    max-width: 500px; /* Prevent it from being too wide */
-    margin: 20px auto; /* Center placeholder too */
+    width: 100%;
+    max-width: 500px;
+    margin: 20px auto;
 }
 
 .cmp-movie__placeholder p {
     margin: 0;
 }
 
-/* Ensure these are still hidden if not used (from previous versions) */
-.cmp-movie__synopsis, /* This needs to be overridden for detail page */
-.cmp-movie__release-date,
-.cmp-movie__linked-cf {
-    /* display: none; */ /* Only use if these elements exist in HTML and need to be hidden globally */
-}
-
 /* ========================================================================= */
-/* --- NEW & MODIFIED STYLES FOR THE MOVIE DETAIL PAGE (`isDetailPage`) --- */
+/* --- STYLES FOR THE MOVIE DETAIL PAGE (`isDetailPage`) --- */
 /* ========================================================================= */
 
 .cmp-movie-card--detail-page {
-    width: auto; /* Remove fixed width */
-    max-width: 1000px; /* Constrain max width for readability */
-    margin: 40px auto; /* Center horizontally with auto margins and add vertical space */
-    flex-direction: row; /* Arrange poster and details side-by-side */
-    align-items: flex-start; /* Align content to the top */
-    padding: 30px; /* Generous padding inside the card */
-    gap: 40px; /* Space between poster and details sections */
-    border-radius: 12px; /* Ensure consistency */
+    width: auto;
+    max-width: 1000px;
+    margin: 40px auto;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 30px;
+    gap: 40px;
+    border-radius: 12px;
+    background-color: #2F2F2F;
 }
 
 .cmp-movie-card--detail-page .cmp-movie__poster-section {
-    flex-shrink: 0; /* Prevent poster from shrinking */
-    width: 350px; /* Fixed width for the detail page poster */
-    height: auto; /* Adjust height based on aspect ratio */
+    flex-shrink: 0;
+    width: 350px;
+    height: auto;
 }
 
 .cmp-movie-card--detail-page .cmp-movie__poster {
-    border-radius: 8px; /* Slightly rounded corners for the poster image */
+    border-radius: 8px;
 }
 
 .cmp-movie-card--detail-page .cmp-movie__details-section {
-    background-color: transparent; /* Remove dark background, let parent handle it */
-    padding: 0; /* Remove padding as parent has it */
-    min-height: auto; /* No fixed min-height for detail page */
-    text-align: left; /* Ensure text is left-aligned */
+    background-color: transparent;
+    padding: 0;
+    min-height: auto;
+    text-align: left;
 }
 
 .cmp-movie-card--detail-page .cmp-movie__title {
-    font-size: 3.2em; /* Much larger title for detail page */
+    font-size: 3.2em;
     margin-bottom: 15px;
     line-height: 1.1;
-    color: #e0e0e0; /* Slightly lighter for headings */
+    color: #e0e0e0;
 }
 
 .cmp-movie-card--detail-page .cmp-movie__meta-info {
     font-size: 1.1em;
     margin-bottom: 25px;
-    color: #c0c0c0; /* Slightly lighter meta info */
+    color: #c0c0c0;
 }
 
-/* Styles for the sinopse (synopsis) on the detail page */
 .cmp-movie-card--detail-page .cmp-movie__sinopse {
     font-size: 1.15em;
     line-height: 1.7;
-    color: #ddd; /* Readable color for main text */
-    margin-top: 20px; /* Space from meta info */
-    text-align: justify; /* Justify text for a clean block look */
+    color: #ddd;
+    margin-top: 20px;
+    text-align: justify;
 }
 
-/* Ensure images within sinopse are styled correctly */
-.cmp-movie-card--detail-page .cmp-movie__sinopse img {
+
+/* ========================================================================= */
+/* --- NEW & MODIFIED STYLES FOR THE MOVIE LIST PAGE (`isMovieListPage`) --- */
+/* ========================================================================= */
+
+.cmp-movie-list-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.cmp-movie-list-container h1 {
+    color: white;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    text-align: center;
+}
+
+.cmp-movie-list {
+    display: flex;
+    flex-direction: column; /* Stack movie cards vertically */
+    gap: 30px; /* Space between each movie card */
+}
+
+/* Style for individual movie cards within the list */
+.cmp-movie-list .cmp-movie-card {
+    /* Use Grid to organize the internal sections */
+    display: grid;
+    grid-template-columns: 220px 1fr; /* INCREASED POSTER WIDTH, remaining for details */
+    grid-template-rows: auto auto 1fr; /* Title row, Meta row, Sinopse row */
+    grid-template-areas:
+        "poster title"
+        "poster meta"
+        "poster sinopse"; /* Define areas for easier placement */
+    gap: 20px 30px; /* Vertical gap between rows, horizontal gap between poster and text */
+
+    background-color: #2F2F2F; /* Dark background for the whole card */
+    padding: 25px; /* Padding inside the card */
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    width: 100%; /* Take full width of its container */
+    max-width: none;
+    align-items: flex-start; /* Align grid items to the start */
+}
+
+.cmp-movie-list .cmp-movie-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.cmp-movie-list .cmp-movie__poster-section {
+    grid-area: poster; /* Assign to poster area */
+    width: 100%; /* Take full width of its grid cell */
+    height: auto;
+    border-radius: 8px;
+    overflow: hidden;
+    /* Ensure age group overlay maintains correct position relative to poster */
+    position: relative;
+    flex-shrink: 0; /* Important to prevent it from shrinking within its grid cell */
+}
+
+.cmp-movie-list .cmp-movie__poster {
+    border-radius: 8px; /* Apply to the image itself */
+}
+
+/* Adjust age group overlay for the list card */
+.cmp-movie-list .cmp-movie__age-group-overlay {
+    bottom: 10px; /* Adjust as needed */
+    right: 10px; /* Adjust as needed */
+}
+
+
+.cmp-movie-list .cmp-movie__title {
+    grid-area: title; /* Assign to title area */
+    font-size: 2.2em; /* Slightly larger title for list items */
+    margin: 0; /* Reset margins from base style */
+    display: flex; /* Allow flex for title and age group badge */
+    align-items: center;
+    gap: 15px; /* Space between title and age group badge */
+    line-height: 1.2;
+}
+
+/* Age group badge next to title on list page */
+.cmp-movie-list .cmp-movie__title .cmp-movie__age-group-badge {
+    padding: 5px 12px;
+    border-radius: 5px;
+    font-size: 0.8em; /* Smaller font size for inline badge */
+    font-weight: bold;
+    color: white;
+    background-color: rgba(0,0,0,0.5); /* A default for safety, overridden by dynamic colors */
+    flex-shrink: 0; /* Prevent it from shrinking */
+}
+/* Ensure dynamic colors apply to the inline badge */
+.cmp-movie-list .cmp-movie__title .cmp-movie__age-group-badge.cmp-movie__age-group-overlay--green { background-color: #4CAF50; }
+.cmp-movie-list .cmp-movie__title .cmp-movie__age-group-badge.cmp-movie__age-group-overlay--blue { background-color: #2196F3; }
+.cmp-movie-list .cmp-movie__title .cmp-movie__age-group-badge.cmp-movie__age-group-overlay--yellow { background-color: #FFEB3B; color: #333; }
+.cmp-movie-list .cmp-movie__title .cmp-movie__age-group-badge.cmp-movie__age-group-overlay--orange { background-color: #FF9800; }
+.cmp-movie-list .cmp-movie__title .cmp-movie__age-group-badge.cmp-movie__age-group-overlay--red { background-color: #F44336; }
+.cmp-movie-list .cmp-movie__title .cmp-movie__age-group-badge.cmp-movie__age-group-overlay--black { background-color: #333; }
+
+
+.cmp-movie-list .cmp-movie__meta-info {
+    grid-area: meta; /* Assign to meta area */
+    font-size: 1.1em; /* Slightly larger meta info */
+    color: #bbb;
+    margin-bottom: 0; /* No bottom margin, grid handles spacing */
+    flex-direction: column; /* Stack gender/time if on separate lines */
+    align-items: flex-start; /* Align text left */
+}
+/* Ensure elements within meta info are display: block for stacking if needed */
+.cmp-movie-list .cmp-movie__meta-info .cmp-movie__gender,
+.cmp-movie-list .cmp-movie__meta-info .cmp-movie__time {
+    margin-bottom: 5px; /* Space between gender and time */
+}
+.cmp-movie-list .cmp-movie__meta-info .cmp-movie__meta-separator {
+    display: none; /* Hide separator if gender and time are on separate lines */
+}
+
+
+/* Style for the sinopse within list items */
+.cmp-movie-list .cmp-movie__sinopse {
+    grid-area: sinopse; /* Assign to sinopse area */
+    font-size: 1.05em; /* Standard text size */
+    line-height: 1.6;
+    color: #ccc; /* Lighter text color */
+    margin: 0; /* Reset margins from base style, grid handles spacing */
+    text-align: left;
+    max-height: none; /* Remove max-height for full sinopse display in this layout */
+    overflow: visible; /* Allow full sinopse to show */
+    text-overflow: clip; /* Remove ellipsis for full sinopse */
+    display: block; /* Ensure it's not flex/box-orient limited */
+    background-color: transparent; /* Ensure no background color here */
+}
+
+/* Ensure images within sinopse are styled correctly for both detail and list */
+.cmp-movie__sinopse img {
     max-width: 100%;
     height: auto;
     display: block;
-    margin: 15px 0;
+    margin: 10px 0;
     border-radius: 5px;
 }
 
-/* Responsive adjustments for smaller screens */
-@media (max-width: 900px) {
-    .cmp-movie-card--detail-page {
-        flex-direction: column; /* Stack poster and details vertically */
-        align-items: center; /* Center items when stacked */
-        padding: 25px;
-        gap: 25px;
-        margin: 25px auto;
-        max-width: 90%; /* Adjust max-width for smaller screens */
+/* Responsive adjustments for list page */
+@media (max-width: 768px) {
+    .cmp-movie-list .cmp-movie-card {
+        grid-template-columns: 1fr; /* Stack all content vertically */
+        grid-template-rows: auto auto auto auto; /* Poster, Title, Meta, Sinopse */
+        grid-template-areas:
+            "poster"
+            "title"
+            "meta"
+            "sinopse";
+        padding: 15px;
+        gap: 15px;
+        text-align: center; /* Center text when stacked */
     }
 
-    .cmp-movie-card--detail-page .cmp-movie__poster-section {
-        width: 70%; /* Poster takes more width on smaller screens when stacked */
-        max-width: 300px; /* Maintain a reasonable max-width */
+    .cmp-movie-list .cmp-movie__poster-section {
+        width: 60%; /* Adjust poster width when stacked */
+        max-width: 200px; /* Max width for stacked posters */
+        margin: 0 auto; /* Center the poster */
     }
 
-    .cmp-movie-card--detail-page .cmp-movie__title {
-        font-size: 2.5em; /* Adjust title size for smaller screens */
-        text-align: center; /* Center title when stacked */
+    .cmp-movie-list .cmp-movie__title {
+        font-size: 1.8em;
+        justify-content: center; /* Center title and badge */
     }
 
-    .cmp-movie-card--detail-page .cmp-movie__meta-info {
+    .cmp-movie-list .cmp-movie__meta-info {
         justify-content: center; /* Center meta info when stacked */
+        align-items: center;
+    }
+    .cmp-movie-list .cmp-movie__meta-info .cmp-movie__meta-separator {
+        display: inline-block; /* Re-enable separator if gender and time on same line */
     }
 
-    .cmp-movie-card--detail-page .cmp-movie__details-section {
-        width: 100%; /* Take full width when stacked */
+    .cmp-movie-list .cmp-movie__sinopse {
+        max-height: none; /* Show full sinopse again */
+        -webkit-line-clamp: unset; /* Remove line clamp */
+        text-align: center; /* Center sinopse for stacked layout */
     }
 }
 
 @media (max-width: 500px) {
-    .cmp-movie-card--detail-page {
-        padding: 15px;
-        gap: 15px;
-        margin: 15px auto;
-    }
-
-    .cmp-movie-card--detail-page .cmp-movie__poster-section {
-        width: 80%;
-    }
-
-    .cmp-movie-card--detail-page .cmp-movie__title {
+    .cmp-movie-list-container h1 {
         font-size: 2em;
     }
 
-    .cmp-movie-card--detail-page .cmp-movie__sinopse {
-        font-size: 1em;
+    .cmp-movie-list .cmp-movie__poster-section {
+        width: 80%;
+    }
+
+    .cmp-movie-list .cmp-movie__title {
+        font-size: 1.5em;
     }
 }
