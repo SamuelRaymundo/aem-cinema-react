@@ -92,12 +92,17 @@
 }
 
 .carousel-movie-section-title {
+    cursor: pointer;
     font-size: 1.8rem;
     font-weight: bold;
     color: var(--text-dark, #333);
     margin: 0 auto 20px auto;
     max-width: fit-content;
     text-transform: uppercase;
+}
+
+.carousel-movie-section-title a{
+    text-decoration: none;
 }
 
 .carousel--movie-type .carousel-movie-list-wrapper {

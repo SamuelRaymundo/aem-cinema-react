@@ -17,8 +17,6 @@ const getAemHost = () => {
 // GraphQL endpoint for your AEM project
 const graphqlEndpoint = `${getAemHost()}/content/cq:graphql/aem-cinema-react/endpoint.json`;
 
-// GraphQL Query for fetching a list of movies (for carousel/list views)
-// IMPORTANT: This query DOES NOT include the 'sinopse' field.
 const GET_FILME_LIST_QUERY = `
     query GetFilmeList {
         filmeList {
@@ -38,9 +36,6 @@ const GET_FILME_LIST_QUERY = `
         }
     }
 `;
-
-// Define the AEM sling:resourceType for the Carousel component
-const CAROUSEL_RESOURCE_TYPE = 'aem-cinema-react/components/carousel';
 
 const Carousel = (props) => {
     const [activeIndex, setActiveIndex] = useState(0);
@@ -230,6 +225,7 @@ const Carousel = (props) => {
     }
 
     // --- MAIN RENDER LOGIC ---
+    const programacaoPage = "http://localhost:4502/content/aem-cinema-react/us/en/home/programacao.html?wcmmode=disabled"
     return (
         <div>
             {/* Render for SLIDE content type */}
@@ -267,7 +263,9 @@ const Carousel = (props) => {
             {/* Render for MOVIE content type */}
             {contentType === "movies" && (
                 <div className="carousel-container carousel--movie-type">
-                    <h2 className="carousel-movie-section-title">PROGRAMAÇÃO</h2>
+                    <h2 className="carousel-movie-section-title">
+                        <a>PROGRAMAÇÃO</a>
+                    </h2>
 
                     <div className="carousel-movie-list-wrapper" ref={movieListRef}>
                         {carouselData.map((movie, index) => (
