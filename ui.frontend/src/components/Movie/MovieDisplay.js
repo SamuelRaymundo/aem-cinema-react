@@ -62,6 +62,33 @@ const GET_FILME_BY_PATH_NO_SINOPSE_QUERY = `
         }
 `;
 
+// GraphQL Query para obter a lista completa de filmes (com sinopse, se necessário)
+const GET_FILME_LIST_FULL_QUERY = `
+    query GetFilmeListFull {
+        filmeList{
+            items{
+              _path 
+              title
+              poster{
+                ... on ImageRef {
+                  _path
+                  mimeType
+                }
+              }
+              gender
+              ageGroup
+              movieTime
+              sinopse {
+                html
+                markdown
+                plaintext
+                json
+              }
+            }
+        }
+    }
+`;
+
 // Helper for age group color styling
 const getAgeGroupColorClass = (ageGroup) => {
     switch (String(ageGroup).toUpperCase()) {
@@ -87,47 +114,102 @@ const formatTitleForUrl = (title) => {
 };
 
 // Base path for your generic movie detail page. This is the ACTUAL AEM page path.
-const MOVIE_DETAIL_PAGE_PATH = '/content/aem-cinema-react/us/en/home/filme.html'; // Changed to match your existing page name
+const MOVIE_DETAIL_PAGE_PATH = '/content/aem-cinema-react/us/en/home/filme.html';
+const MOVIE_LIST_PAGE_PATH = '/content/aem-cinema-react/us/en/home/programacao.html';
 
 const MovieDisplay = ({ movie, fragmentPath }) => {
-    const [fetchedMovieData, setFetchedMovieData] = useState(null);
+    const [fetchedMovieData, setFetchedMovieData] = useState(null); // For single movie fetch (detail/standalone)
+    const [movieList, setMovieList] = useState([]); // For list of movies on programacao page
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
 
     // Determine the movie data to display: prioritize 'movie' prop, then fetched data
+    // This will now only apply if it's a single movie display
     const currentMovieData = movie || fetchedMovieData;
 
-    // Detect if current page is the detail page by looking for the 'slug' query parameter
-    // and if the base URL matches our detail page
+    // Detect if current page is the detail page
     const isDetailPage = typeof window !== 'undefined' &&
         window.location.pathname === MOVIE_DETAIL_PAGE_PATH &&
         new URLSearchParams(window.location.search).has('slug');
+
+    // Detect if current page is the movie list page
+    const isMovieListPage = typeof window !== 'undefined' &&
+        window.location.pathname === MOVIE_LIST_PAGE_PATH;
 
     // Effect for logging current state and props (helpful for debugging)
     useEffect(() => {
         console.log("MovieDisplay Debug: --- COMPONENT MOUNT/UPDATE ---");
         console.log(`MovieDisplay Debug: Current URL: ${window.location.pathname}${window.location.search}`);
         console.log(`MovieDisplay Debug: isDetailPage detected as: ${isDetailPage}`);
+        console.log(`MovieDisplay Debug: isMovieListPage detected as: ${isMovieListPage}`);
         console.log(`MovieDisplay Debug: 'movie' prop received (from Carousel/List):`, movie);
         console.log(`MovieDisplay Debug: 'fragmentPath' prop received (from AEM dialog):`, fragmentPath);
         console.log("MovieDisplay Debug: -----------------------------");
-    }, [isDetailPage, movie, fragmentPath]);
+    }, [isDetailPage, isMovieListPage, movie, fragmentPath]);
 
     // Main useEffect for data fetching logic
     useEffect(() => {
         console.log("MovieDisplay Debug: Entering data fetching useEffect.");
 
-        // If 'movie' prop is provided (from Carousel), use it directly.
-        if (movie) {
+        // If 'movie' prop is provided (from Carousel), use it directly for single display.
+        if (movie && !isMovieListPage) { // Ensure we don't use this prop if we're on the list page
             console.log("MovieDisplay Debug: Using 'movie' prop data (from list/carousel). No new fetch needed.");
             setLoading(false);
             setError(false);
-            setFetchedMovieData(null);
+            setFetchedMovieData(null); // Clear fetched data if using prop
+            setMovieList([]); // Clear movie list
             return;
         }
 
+        // --- Logic for Movie List Page ---
+        if (isMovieListPage) {
+            console.log("MovieDisplay Debug: Movie List Page detected. Fetching all movies.");
+            const fetchMovieList = async () => {
+                setLoading(true);
+                setError(false);
+                setMovieList([]); // Clear previous list data
+                setFetchedMovieData(null); // Ensure single movie data is clear
+
+                try {
+                    console.log(`MovieDisplay Debug: Sending GraphQL query for list to ${graphqlEndpoint}`);
+                    const response = await axios.post(graphqlEndpoint, {
+                        query: GET_FILME_LIST_FULL_QUERY
+                    }, { withCredentials: true });
+
+                    console.log("MovieDisplay Debug: GraphQL List Response received:", response.data);
+
+                    if (response.data?.data?.filmeList?.items) {
+                        const processedList = response.data.data.filmeList.items.map(item => ({
+                            ...item,
+                            poster: item.poster ? `${getAemHost()}${item.poster._path}` : '',
+                            sinopse: item.sinopse ? {
+                                ...item.sinopse,
+                                html: item.sinopse.html ? item.sinopse.html.replace(/src="\/content/g, `src="${getAemHost()}/content`) : ''
+                            } : null
+                        }));
+                        setMovieList(processedList);
+                        console.log("MovieDisplay Debug: Movie list successfully processed and set:", processedList);
+                    } else {
+                        setError(true);
+                        console.error("MovieDisplay Debug: Failed to fetch movie list or 'items' is empty/null.", response.data);
+                        if (response.data?.errors) {
+                            console.error("MovieDisplay Debug: GraphQL Errors array:", response.data.errors);
+                        }
+                    }
+                } catch (err) {
+                    setError(true);
+                    console.error("MovieDisplay Debug: Error fetching movie list via Axios:", err);
+                } finally {
+                    setLoading(false);
+                    console.log("MovieDisplay Debug: Movie list fetching completed. Loading state set to false.");
+                }
+            };
+            fetchMovieList();
+            return; // Exit this useEffect as we handled the list page
+        }
+
+        // --- Logic for Detail Page or Standalone Component ---
         let targetFragmentSlug = null;
-        // If it's the detail page (as detected by URL), get the slug from query parameter
         if (isDetailPage) {
             targetFragmentSlug = new URLSearchParams(window.location.search).get('slug');
             console.log(`MovieDisplay Debug: Detail page detected. Slug from URL: '${targetFragmentSlug}'`);
@@ -138,21 +220,16 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
                 return;
             }
         } else if (fragmentPath) {
-            // If it's a standalone component on a non-detail page and has a fragmentPath prop
+            // If it's a standalone component on a non-detail/non-list page and has a fragmentPath prop
             // Extract slug from fragmentPath. This will be used for fetch WITHOUT sinopse.
             const pathParts = fragmentPath.split('/');
             targetFragmentSlug = pathParts[pathParts.length - 1];
             console.log(`MovieDisplay Debug: Using 'fragmentPath' prop for standalone display. Original: '${fragmentPath}', Extracted slug: '${targetFragmentSlug}'`);
         }
 
-        // Now, if we have a targetFragmentSlug, construct the full CF path and fetch.
+        // Now, if we have a targetFragmentSlug, construct the full CF path and fetch a single movie.
         if (targetFragmentSlug) {
-            // Ensure the path is correctly lowercased and formatted if your CF names are case-sensitive
-            // or if the slug formatting differs from CF names.
-            // It's often safer to use the EXACT slug provided, assuming it matches the CF name.
-            const cfNameFromSlug = formatTitleForUrl(targetFragmentSlug); // Use this if your CF names match the slug format
-            // OR simply: const cfNameFromSlug = targetFragmentSlug; // Use this if your CF names are exactly what comes in the slug param
-
+            const cfNameFromSlug = formatTitleForUrl(targetFragmentSlug);
             const targetFragmentPath = `/content/dam/aem-cinema-react/movies-/${cfNameFromSlug}`;
             console.log(`MovieDisplay Debug: Constructed Content Fragment path for GraphQL: '${targetFragmentPath}'`);
 
@@ -160,6 +237,7 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
                 setLoading(true);
                 setError(false);
                 setFetchedMovieData(null); // Clear previous data
+                setMovieList([]); // Ensure movie list is clear
                 let query;
                 let dataProcessor = (item) => ({ // Base processor
                     ...item,
@@ -201,7 +279,6 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
                     } else {
                         setError(true);
                         console.error("MovieDisplay Debug: Failed to fetch Content Fragment data or 'item' is empty/null.", response.data);
-                        // Also check for GraphQL errors array
                         if (response.data?.errors) {
                             console.error("MovieDisplay Debug: GraphQL Errors array:", response.data.errors);
                         }
@@ -210,15 +287,11 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
                     setError(true);
                     console.error("MovieDisplay Debug: Error fetching Content Fragment via Axios:", err);
                     if (err.response) {
-                        // The request was made and the server responded with a status code
-                        // that falls out of the range of 2xx
                         console.error("MovieDisplay Debug: Axios response error status:", err.response.status);
                         console.error("MovieDisplay Debug: Axios response error data:", err.response.data);
                     } else if (err.request) {
-                        // The request was made but no response was received
                         console.error("MovieDisplay Debug: Axios no response received. Request:", err.request);
                     } else {
-                        // Something happened in setting up the request that triggered an Error
                         console.error("MovieDisplay Debug: Axios request setup error:", err.message);
                     }
                 } finally {
@@ -227,17 +300,20 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
                 }
             };
             fetchMovieData();
-        } else {
-            console.log("MovieDisplay Debug: No valid source for movie data found (neither prop, nor URL slug, nor fragmentPath prop). Not fetching.");
+        } else if (!isMovieListPage && !movie) { // Only log this if it's not a list page and no movie prop
+            console.log("MovieDisplay Debug: No valid source for movie data found (neither prop, nor URL slug, nor fragmentPath prop, nor list page). Not fetching single movie.");
             setLoading(false);
             setFetchedMovieData(null);
         }
-    }, [movie, fragmentPath, isDetailPage]); // Dependencies for useEffect
+    }, [movie, fragmentPath, isDetailPage, isMovieListPage]); // Dependencies for useEffect
 
     // Function to handle poster click and navigate to the detail page
-    const handlePosterClick = useCallback(() => {
+    const handlePosterClick = useCallback((clickedMovie) => {
+        // Use clickedMovie if provided (from map iteration), otherwise fall back to currentMovieData
+        const movieToNavigate = clickedMovie || currentMovieData;
+
         // Prevent navigation if already on the detail page or if essential movie data is missing
-        if (!currentMovieData?._path || !currentMovieData?.title || isDetailPage) {
+        if (!movieToNavigate?._path || !movieToNavigate?.title || isDetailPage) {
             if (isDetailPage) {
                 console.log("MovieDisplay Debug: handlePosterClick: Already on detail page, not navigating.");
             } else {
@@ -246,7 +322,7 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
             return;
         }
 
-        const formattedTitle = formatTitleForUrl(currentMovieData.title);
+        const formattedTitle = formatTitleForUrl(movieToNavigate.title);
         const navigateTo = `${getAemHost()}${MOVIE_DETAIL_PAGE_PATH}?slug=${formattedTitle}`;
 
         console.log("MovieDisplay Debug: handlePosterClick: Navigating to movie detail page:", navigateTo);
@@ -257,7 +333,7 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
         } else {
             window.location.assign(`${navigateTo}&wcmmode=disabled`); // Add wcmmode for consistency in preview
         }
-    }, [currentMovieData, isDetailPage]);
+    }, [currentMovieData, isDetailPage]); // Added currentMovieData to dependencies
 
     // Render loading/error/placeholder states
     if (loading) {
@@ -279,7 +355,8 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
     }
 
     // Show configuration message if no data and component needs configuration (e.g., in AEM editor)
-    if (!currentMovieData && !movie && !isDetailPage && fragmentPath) {
+    // This applies if it's a standalone component and not a detail/list page
+    if (!currentMovieData && !movieList.length && !isDetailPage && !isMovieListPage && fragmentPath) {
         console.log("MovieDisplay Debug: Rendering: Configuration prompt (no data, but fragmentPath provided).");
         return (
             <div className="cmp-movie-card cmp-movie__placeholder">
@@ -287,9 +364,55 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
             </div>
         );
     }
+
+    // Render logic for the Movie List Page
+    if (isMovieListPage) {
+        if (movieList.length === 0) {
+            console.log("MovieDisplay Debug: Rendering: Movie list page, but no movies found.");
+            return (
+                <div className="cmp-movie-list-container cmp-movie__placeholder">
+                    <p>Nenhum filme disponível no momento.</p>
+                </div>
+            );
+        }
+        console.log("MovieDisplay Debug: Rendering: Movie list page with movies.");
+        return (
+            <div className="cmp-movie-list-container">
+                <h1>Programação de Filmes</h1>
+                <div className="cmp-movie-list">
+                    {movieList.map((movieItem) => {
+                        const ageGroupColorClass = movieItem.ageGroup ? getAgeGroupColorClass(movieItem.ageGroup) : '';
+                        return (
+                            <div className="cmp-movie-card" key={movieItem._path}>
+                                {movieItem.poster && (
+                                    <div className="cmp-movie__poster-section" onClick={() => handlePosterClick(movieItem)} style={{ cursor: 'pointer' }}>
+                                        <img className="cmp-movie__poster" src={movieItem.poster} alt={`${movieItem.title || 'Movie'} Poster`} />
+                                        {movieItem.ageGroup && (
+                                            <p className={`cmp-movie__age-group-overlay ${ageGroupColorClass}`}>
+                                                {movieItem.ageGroup}
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+                                <div className="cmp-movie__details-section">
+                                    {movieItem.title && <h2 className="cmp-movie__title">{movieItem.title}</h2>}
+                                    <div className="cmp-movie__meta-info">
+                                        {movieItem.gender && <span className="cmp-movie__gender">{movieItem.gender}</span>}
+                                        {movieItem.gender && movieItem.movieTime && <span className="cmp-movie__meta-separator"> • </span>}
+                                        {movieItem.movieTime && <span className="cmp-movie__time">{movieItem.movieTime}m</span>}
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    }
+
     // Don't render anything if no data is available and no configuration prompt is applicable
     if (!currentMovieData) {
-        console.log("MovieDisplay Debug: Rendering: No data available to render.");
+        console.log("MovieDisplay Debug: Rendering: No data available to render (single movie context).");
         // If it's a detail page but no data could be fetched for the slug
         if (isDetailPage) {
             console.log("MovieDisplay Debug: Rendering: Detail page, but movie not found for slug.");
@@ -306,17 +429,16 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
     console.log("MovieDisplay Debug: currentMovieData (at final render):", currentMovieData);
     console.log("MovieDisplay Debug: isDetailPage (at final render):", isDetailPage);
 
-
-    // Destructure movie data for rendering
+    // Destructure movie data for rendering a single movie
     const { title, poster, ageGroup, gender, movieTime, sinopse } = currentMovieData;
     const ageGroupColorClass = ageGroup ? getAgeGroupColorClass(ageGroup) : '';
 
-    console.log(`MovieDisplay Debug: Rendering: Movie found - ${title}`);
+    console.log(`MovieDisplay Debug: Rendering: Single movie found - ${title}`);
 
     return (
         <div className={`cmp-movie-card ${isDetailPage ? 'cmp-movie-card--detail-page' : ''}`}>
             {poster && (
-                <div className="cmp-movie__poster-section" onClick={handlePosterClick} style={{ cursor: isDetailPage ? 'default' : 'pointer' }}>
+                <div className="cmp-movie__poster-section" onClick={() => handlePosterClick(currentMovieData)} style={{ cursor: isDetailPage ? 'default' : 'pointer' }}>
                     <img className="cmp-movie__poster" src={poster} alt={`${title || 'Movie'} Poster`} />
                     {ageGroup && (
                         <p className={`cmp-movie__age-group-overlay ${ageGroupColorClass}`}>
@@ -332,16 +454,14 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
                     {gender && <span className="cmp-movie__gender">{gender}</span>}
                     {gender && movieTime && <span className="cmp-movie__meta-separator"> • </span>}
                     {movieTime && <span className="cmp-movie__time">{movieTime}m</span>}
-                    <h4>Sinopse</h4>
+                    {isDetailPage && <h4>Sinopse</h4>} {/* Only show "Sinopse" heading on detail page */}
                 </div>
                 {/* SINOPSE IS ONLY RENDERED IF 'isDetailPage' IS TRUE AND sinopse.html EXISTS */}
                 {isDetailPage && sinopse && sinopse.html && (
-
                     <div
                         className="cmp-movie__sinopse"
                         dangerouslySetInnerHTML={{ __html: sinopse.html }}
                     />
-
                 )}
             </div>
         </div>
