@@ -26,14 +26,14 @@ class CustomNavbar extends Component {
         return (
             <nav className="custom-navbar">
 
-                {/* Top Navbar Section */}
+
                 <div className="custom-navbar-top">
-                    {/* Brand/Logo - Left Side */}
+
                     <div className="custom-navbar-brand">
-                        <span>Topázio Cinemas</span>
+                        <a href={"http://localhost:4502/content/aem-cinema-react/us/en/home.html?wcmmode=disabled"}><span>Topázio Cinemas</span></a>
                     </div>
 
-                    {/* Top Links - Right Side */}
+
                     <div className="custom-navbar-links-top">
                         {topazPlusUrl && (
                             <a href={topazPlusUrl} className="custom-navbar-top-button">

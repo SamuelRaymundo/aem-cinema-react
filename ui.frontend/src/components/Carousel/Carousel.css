@@ -102,6 +102,7 @@
 }
 
 .carousel-movie-section-title a{
+    color: var(--text-dark, #333);
     text-decoration: none;
 }
 

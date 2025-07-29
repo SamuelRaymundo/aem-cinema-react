@@ -27,6 +27,7 @@ require('./Page.css');
 // "aem-cinema-react/components/page" resource type. For now, the rendering is
 // the same as the RootPage; this is more for illustration purposes
 class AppPage extends Page {
+
   get containerProps() {
     let attrs = super.containerProps;
     attrs.className =

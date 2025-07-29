@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@adobe/adobe-client-data-layer": "^2.0.2"
+  }
+}

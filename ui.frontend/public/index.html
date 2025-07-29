@@ -30,55 +30,9 @@
         <script>
             window.adobeDataLayer = window.adobeDataLayer || [];
 
-            // Este push deve ser feito no seu componente React
-            // (ex: HomePage), depois que os dados da sua query GraphQL
-            // `GetFilmeList` tiverem sido carregados com sucesso.
-
-            window.adobeDataLayer.push({
-                page: {
-                    type: 'home', // 'home' ou 'movie_listing'
-                    name: 'Página Inicial - Topázio Cinemas',
-                    path: '/content/aem-cinema-react/us/en/home.html',
-                    language: 'pt-br',
-                    siteSection: 'Filmes em Cartaz'
-                },
-                user: {
-                    isAuthenticated: false,
-                    userID: null,
-                    userSegment: 'Visitante Não Logado',
-                    loyaltyMember: false,
-                },
-                event: {
-                    name: 'pageView',
-                    category: 'Navigation',
-                    action: 'Viewed Home Page'
-                },
-                // NOVO: Adicione uma lista de filmes visíveis na página
-                visibleMovies: [
-                    // Iterar sobre os `items` da sua query `filmeList` e preencher aqui
-                    // Usando '_path' como 'id'
-                    // Exemplo com dados da sua query:
-                    {
-                        id: '/content/aem-cinema-react/us/en/filme/pearl', // <- Usando _path do item
-                        name: 'Pearl', // Corresponde a 'title' da query
-                        posterPath: '/content/dam/pearl-poster.jpg', // Corresponde a '_path' do poster
-                        ageRating: '18+', // Corresponde a 'ageGroup'
-                        genre: ['Terror', 'Drama'], // Corresponde a 'gender' (assumindo que é o gênero do filme)
-                        durationMinutes: 102 // Corresponde a 'movieTime' (assumindo que é duração)
-                    },
-                    {
-                        id: '/content/aem-cinema-react/us/en/filme/central-do-brasil',
-                        name: 'Central do Brasil',
-                        posterPath: '/content/dam/central-do-brasil-poster.jpg',
-                        ageRating: 'Livre',
-                        genre: ['Drama'],
-                        durationMinutes: 113
-                    },
-                    // ... outros filmes da lista vindos do GraphQL
-                ]
-            });
+            window.adobeDataLayer.push({ "test": "Hello World" });
         </script>
-        <script src="https://assets.adobedtm.com/bf7d2eead985/4f5e7361e3d1/launch-0aadcc968867-development.min.js" async></script>
+        <script src="adobe-client-data-layer.min.js" defer async></script>
     </head>
     <body class="page basicpage">
         <noscript>You need to enable JavaScript to run this app.</noscript>

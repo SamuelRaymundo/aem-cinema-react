@@ -45,6 +45,10 @@
     color: var(--text-lighter);
 }
 
+.custom-navbar-brand span a {
+    text-decoration: none;
+}
+
 .custom-navbar-brand::before {
     content: '🎬';
     margin-right: 8px;

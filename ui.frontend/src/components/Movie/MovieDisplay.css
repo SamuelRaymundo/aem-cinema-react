@@ -7,7 +7,7 @@
     border-radius: 12px; /* Rounded corners for the entire card */
     overflow: hidden; /* Ensures content respects border-radius */
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); /* Stronger shadow */
-    font-family: 'Segoe UI', Arial, sans-serif; /* Modern font */
+    font-family: var(--font-sans); /* Modern font */
     color: white; /* Default text color for the dark section */
     display: flex;
     flex-direction: column; /* Default for single cards (carousel/standalone) */
@@ -120,12 +120,12 @@
 
 /* --- Placeholder for Editor --- */
 .cmp-movie__placeholder {
-    color: #999;
+    color: var(--text-dark);
     text-align: center;
     padding: 20px;
-    border: 1px dashed #ccc;
+    /*border: 1px dashed #ccc;*/
     border-radius: 4px;
-    background-color: #f0f0f0;
+    /*background-color: #f0f0f0;*/
     min-height: 150px;
     display: flex;
     align-items: center;
@@ -133,6 +133,7 @@
     width: 100%;
     max-width: 500px;
     margin: 20px auto;
+    font-family: var(--font-sans);
 }
 
 .cmp-movie__placeholder p {
@@ -205,7 +206,8 @@
 }
 
 .cmp-movie-list-container h1 {
-    color: white;
+    color: var(--text-dark);
+    font-family: var(--font-sans);
     margin-bottom: 30px;
     font-size: 2.5em;
     text-align: center;
@@ -337,6 +339,63 @@
     border-radius: 5px;
 }
 
+/* ========================================================================= */
+/* --- STYLES FOR THE GENDER FILTER DROPDOWN --- */
+/* ========================================================================= */
+
+.cmp-movie-filter-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Space between label and select */
+    margin-bottom: 30px; /* Space below the filter controls */
+    justify-content: flex-start; /* Align to the left */
+    max-width: 1200px; /* Match container width */
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 20px;
+    font-family: var(--font-sans);
+}
+
+.cmp-movie-filter-controls label {
+    color:var(--text-dark); /* Lighter white for the label */
+    font-size: 1.1em;
+    font-weight: 500;
+    white-space: nowrap; /* Prevent label from wrapping */
+}
+
+.cmp-movie-filter-controls select {
+    background-color: var(--secondary-color); /* Darker background for the dropdown */
+    color: white; /* White text */
+    border: 1px solid #555; /* Subtle border */
+    border-radius: 8px; /* Rounded corners */
+    padding: 10px 15px; /* Ample padding */
+    font-size: 1em;
+    cursor: pointer;
+    appearance: none; /* Remove default system arrow */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2C197.6L155.1%2C65.8c-4.6-4.6-12.1-4.6-16.8,0L5.4,197.6c-4.6,4.6-4.6,12.1,0,16.8l8.4,8.4c4.6,4.6,12.1,4.6,16.8,0L146.7,106c4.6-4.6,12.1-4.6,16.8,0l116.1,117c4.6,4.6,12.1,4.6,16.8,0l8.4-8.4C291.5,209.7,291.5,202.2,287,197.6z%22%2F%3E%3C%2Fsvg%3E'); /* Custom white arrow */
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 12px; /* Size of the custom arrow */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    min-width: 180px; /* Ensure a decent width */
+}
+
+.cmp-movie-filter-controls select:focus {
+    outline: none;
+    border-color: #007bff; /* Blue border on focus */
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* Subtle glow on focus */
+}
+
+.cmp-movie-filter-controls select option {
+    background-color: #3a3a3a; /* Match dropdown background for options */
+    color: white;
+}
+
+
+
+
 /* Responsive adjustments for list page */
 @media (max-width: 768px) {
     .cmp-movie-list .cmp-movie-card {
@@ -389,5 +448,21 @@
 
     .cmp-movie-list .cmp-movie__title {
         font-size: 1.5em;
+    }
+}
+/* Responsive adjustments for filter controls */
+@media (max-width: 768px) {
+    .cmp-movie-filter-controls {
+        flex-direction: column; /* Stack label and select vertically */
+        align-items: flex-start; /* Align items to the left when stacked */
+        gap: 10px;
+        margin-bottom: 20px;
+        padding: 0 15px; /* Adjust padding for smaller screens */
+    }
+
+    .cmp-movie-filter-controls select {
+        width: 100%; /* Make select full width when stacked */
+        max-width: none; /* Remove any max-width constraints */
+        min-width: unset;
     }
 }

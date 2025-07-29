@@ -264,7 +264,7 @@ const Carousel = (props) => {
             {contentType === "movies" && (
                 <div className="carousel-container carousel--movie-type">
                     <h2 className="carousel-movie-section-title">
-                        <a>PROGRAMAÇÃO</a>
+                        <a href={programacaoPage}>PROGRAMAÇÃO</a>
                     </h2>
 
                     <div className="carousel-movie-list-wrapper" ref={movieListRef}>
