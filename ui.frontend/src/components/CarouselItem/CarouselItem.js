@@ -6,18 +6,17 @@ const CarouselItem = (props) => {
 
     return (
         <div className={`carousel-item ${isActive ? 'active' : ''}`}>
-            {/* Image Wrapper and Image */}
             {fileReference && (
-                <div className="carousel-item__image-wrapper"> {/* Use this class */}
-                    <img src={fileReference} alt={title || 'Slide Image'} className="carousel-item__image" /> {/* Use this class */}
+                <div className="carousel-item__image-wrapper">
+                    <img src={fileReference} alt={title || 'Slide Image'} className="carousel-item__image" />
                 </div>
             )}
 
             {/* Overlay Content */}
-            <div className="carousel-item__overlay-content"> {/* Use this class */}
-                {title && <h3 className="carousel-item__title">{title}</h3>} {/* Use this class */}
+            <div className="carousel-item__overlay-content">
+                {title && <h3 className="carousel-item__title">{title}</h3>}
                 {buttonName && (internalLink || externalLink) && (
-                    <a href={internalLink || externalLink} className="carousel-item__button"> {/* Use this class */}
+                    <a href={internalLink || externalLink} className="carousel-item__button">
                         {buttonName}
                     </a>
                 )}

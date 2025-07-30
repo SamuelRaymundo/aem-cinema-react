@@ -1,8 +1,18 @@
 import React, {Component} from 'react';
 import './Footer.css'
 import {MapTo} from "@adobe/aem-react-editable-components";
+import {trackComponent} from "../../utils/UseComponentTracking";
 
 class Footer extends Component{
+    componentDidMount() {
+        trackComponent(this.props.id, this.props.dataLayer);
+    }
+
+    componentDidUpdate(prevProps) {
+        if (prevProps.id !== this.props.id || prevProps.dataLayer !== this.props.dataLayer) {
+            trackComponent(this.props.id, this.props.dataLayer);
+        }
+    }
     render(){
         return (
             <footer className="aem-cinema-footer">

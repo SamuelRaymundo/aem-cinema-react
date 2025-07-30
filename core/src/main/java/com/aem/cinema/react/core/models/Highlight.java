@@ -1,8 +1,12 @@
 package com.aem.cinema.react.core.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.util.Map;
+
 public interface Highlight {
 
-    String getfileReference();
+    String getFileReference();
 
     String getAlignment();
 
@@ -17,4 +21,10 @@ public interface Highlight {
 
 
     String getExternalLink();
+
+    @JsonIgnore
+    Map<String, Object> getAriaAttributes();
+
+    @JsonIgnore
+    String getRoleAttribute();
 }

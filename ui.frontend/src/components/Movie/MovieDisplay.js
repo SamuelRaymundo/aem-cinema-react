@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { MapTo } from '@adobe/aem-react-editable-components';
 import axios from 'axios';
 import './MovieDisplay.css';
+import {trackComponent} from "../../utils/UseComponentTracking";
 
 const getAemHost = () => {
     if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
@@ -111,7 +112,9 @@ const formatTitleForUrl = (title) => {
 const MOVIE_DETAIL_PAGE_PATH = '/content/aem-cinema-react/us/en/home/filme.html';
 const MOVIE_LIST_PAGE_PATH = '/content/aem-cinema-react/us/en/home/programacao.html';
 
-const MovieDisplay = ({ movie, fragmentPath }) => {
+const MovieDisplay = ({movie, fragmentPath }) => {
+
+
     const [fetchedMovieData, setFetchedMovieData] = useState(null);
     const [movieList, setMovieList] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -130,10 +133,8 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
 
 
     useEffect(() => {
-        console.log("MovieDisplay Debug: Entering data fetching useEffect.");
 
         if (movie && !isMovieListPage) {
-            console.log("MovieDisplay Debug: Using 'movie' prop data (from list/carousel). No new fetch needed.");
             setLoading(false);
             setError(false);
             setFetchedMovieData(null);
@@ -142,7 +143,6 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
         }
 
         if (isMovieListPage) {
-            console.log("MovieDisplay Debug: Movie List Page detected. Fetching movies with filter.");
             const fetchMovieList = async () => {
                 setLoading(true);
                 setError(false);
@@ -300,7 +300,7 @@ const MovieDisplay = ({ movie, fragmentPath }) => {
         const availableGenders = [ "Aventura", "Comedia", "Drama","Terror", "Animacao"];
 
         if (movieList.length === 0 && !loading) {
-            console.log("MovieDisplay Debug: Rendering: Movie list page, but no movies found for current filter.");
+
             return (
                 <div className="cmp-movie-list-container cmp-movie__placeholder">
                     <h1>Programação de Filmes</h1>

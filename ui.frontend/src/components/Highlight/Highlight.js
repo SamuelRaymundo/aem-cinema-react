@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useEffect } from "react"; // Import useEffect
 import { MapTo } from "@adobe/aem-react-editable-components";
 import "./Highlight.css";
+import { trackComponent } from "../../utils/UseComponentTracking"; // Ensure this path is correct
 
 const RESOURCE_TYPE = "aem-cinema-react/components/highlight";
 
 const Highlight = ({
+                       id, // Destructure 'id' from props
+                       dataLayer, // Destructure 'dataLayer' from props
                        fileReference,
                        title,
                        description,
@@ -13,6 +16,14 @@ const Highlight = ({
                        internalLink,
                        externalLink,
                    }) => {
+
+    // Use useEffect for component tracking
+    useEffect(() => {
+        // Check if id and dataLayer are provided via props
+        if (id && dataLayer) {
+            trackComponent(id, dataLayer);
+        }
+    }, [id, dataLayer]); // Re-run effect if id or dataLayer changes
 
     const getInternalLink = (link) => {
         if (!link) return null;

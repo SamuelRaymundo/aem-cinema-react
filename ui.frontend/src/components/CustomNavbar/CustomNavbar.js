@@ -1,8 +1,8 @@
 import React, {Component} from "react";
 import { Link } from "react-router-dom";
 import {MapTo} from "@adobe/aem-react-editable-components";
+import {trackComponent} from '../../utils/UseComponentTracking'
 
-// Import your new CSS file here
 import './CustomNavbar.css';
 
 const CustomNavbarContentEditConfig = {
@@ -20,7 +20,18 @@ const CustomNavbarContentEditConfig = {
 };
 
 class CustomNavbar extends Component {
+    componentDidMount() {
+        trackComponent(this.props.id, this.props.dataLayer);
+    }
+
+    componentDidUpdate(prevProps) {
+        if (prevProps.id !== this.props.id || prevProps.dataLayer !== this.props.dataLayer) {
+            trackComponent(this.props.id, this.props.dataLayer);
+        }
+    }
     render() {
+
+
         const { navbarPages, topazPlusUrl, accessibilityUrl, faqUrl } = this.props;
 
         return (

@@ -5,8 +5,7 @@ import CarouselItem from "../CarouselItem/CarouselItem";
 import MovieDisplay from "../Movie/MovieDisplay";
 
 import './Carousel.css';
-
-// Helper to get AEM Host
+import {trackComponent} from "../../utils/UseComponentTracking";
 const getAemHost = () => {
     if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
         return 'http://localhost:4502';
@@ -14,7 +13,6 @@ const getAemHost = () => {
     return typeof window !== 'undefined' ? window.location.origin : '';
 };
 
-// GraphQL endpoint for your AEM project
 const graphqlEndpoint = `${getAemHost()}/content/cq:graphql/aem-cinema-react/endpoint.json`;
 
 const GET_FILME_LIST_QUERY = `
@@ -38,9 +36,16 @@ const GET_FILME_LIST_QUERY = `
 `;
 
 const Carousel = (props) => {
+
+    useEffect(() => {
+        if (props.id && props.dataLayer) {
+            trackComponent(props.id, props.dataLayer);
+        }
+    }, [props.id, props.dataLayer]);
+
     const [activeIndex, setActiveIndex] = useState(0);
 
-    // States for movie list data directly within Carousel
+
     const [moviesList, setMoviesList] = useState([]);
     const [moviesListLoading, setMoviesListLoading] = useState(false);
     const [moviesListError, setMoviesListError] = useState(false);
@@ -55,7 +60,7 @@ const Carousel = (props) => {
     let calculatedTotalItems = 0;
     const numToDuplicate = 4;
 
-    // Function to fetch the list of movies (now internal to Carousel)
+
     const fetchMoviesList = useCallback(async () => {
         setMoviesListLoading(true);
         setMoviesListError(false);
@@ -78,9 +83,8 @@ const Carousel = (props) => {
         } finally {
             setMoviesListLoading(false);
         }
-    }, []); // Empty dependency array, function created once
+    }, []);
 
-    // Prepare data based on content type
     if (contentType === "movies") {
         if (!moviesListLoading && !moviesListError && moviesList.length > 0) {
             const head = moviesList.slice(-numToDuplicate);
@@ -145,14 +149,14 @@ const Carousel = (props) => {
         }
     }, [moviesList.length, isTeleporting, numToDuplicate]);
 
-    // Effect to trigger fetching the list of movies for 'movies' content type
+
     useEffect(() => {
         if (contentType === "movies") {
-            fetchMoviesList(); // Call the fetch function directly from here
+            fetchMoviesList();
         }
     }, [contentType, fetchMoviesList]);
 
-    // Effect for generic slide carousel auto-advance
+
     useEffect(() => {
         if (contentType === "slide" && calculatedTotalItems > 1) {
             clearInterval(intervalRef.current);
@@ -167,7 +171,7 @@ const Carousel = (props) => {
         }
     }, [calculatedTotalItems, goToNextItem, contentType]);
 
-    // Effect for movie carousel auto-scroll
+
     useEffect(() => {
         if (contentType === "movies" && moviesList.length > numToDuplicate) {
             const autoScrollInterval = setInterval(() => {
@@ -177,7 +181,7 @@ const Carousel = (props) => {
         }
     }, [contentType, moviesList.length, scrollMovieList, numToDuplicate]);
 
-    // Effect to initialize movie carousel scroll position
+
     useEffect(() => {
         if (contentType === "movies" && movieListRef.current && moviesList.length > 0) {
             const itemWidth = movieListRef.current.querySelector('.cmp-movie-card')?.offsetWidth || 250;
@@ -189,7 +193,6 @@ const Carousel = (props) => {
         }
     }, [contentType, moviesList.length, numToDuplicate]);
 
-    // --- CONDITIONAL RENDERING FOR LOADING/ERROR/EMPTY STATES ---
     if (contentType === "movies") {
         if (moviesListLoading) {
             return (
@@ -224,7 +227,6 @@ const Carousel = (props) => {
         );
     }
 
-    // --- MAIN RENDER LOGIC ---
     const programacaoPage = "http://localhost:4502/content/aem-cinema-react/us/en/home/programacao.html?wcmmode=disabled"
     return (
         <div>
@@ -260,7 +262,6 @@ const Carousel = (props) => {
                 </div>
             )}
 
-            {/* Render for MOVIE content type */}
             {contentType === "movies" && (
                 <div className="carousel-container carousel--movie-type">
                     <h2 className="carousel-movie-section-title">
@@ -289,7 +290,7 @@ const Carousel = (props) => {
     );
 };
 
-// Map the React Carousel component to the AEM component's sling:resourceType
+
 const CAROUSEL_RESOURCE_TYPE_AEM = 'aem-cinema-react/components/carousel';
 MapTo(CAROUSEL_RESOURCE_TYPE_AEM)(Carousel);
 
